@@ -1,0 +1,5 @@
+# Quebra de linha igual em qualquer computador (Windows, Mac, Linux)
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.xlsx binary
