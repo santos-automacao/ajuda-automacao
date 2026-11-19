@@ -24,7 +24,7 @@ A ideia veio do app "Meu Ajudante" (orçamento de elétrica), mas aqui o foco é
 2. O escopo vivo fica em `docs/escopo-mvp.md`.
 3. A planilha `catalogo/catalogo-casa.xlsx` é a fonte dos dados. `npm run dados` gera `src/dados/` (não editar `src/dados/` à mão).
 4. Antes de dizer que terminou: `npm run tipos`, `npm run lint`, `npm run exportar-web` e testar o fluxo no navegador em tamanho de celular (390 px) e de notebook (1366 px).
-5. Commits em português. `git push` na `main` publica o site no GitHub Pages.
+5. Commits em português. `git push` na `main` publica o site na **Vercel** (endereço principal para os testadores) e no GitHub Pages (reserva).
 
 ## Regras de tela (não quebrar)
 
@@ -37,7 +37,9 @@ A ideia veio do app "Meu Ajudante" (orçamento de elétrica), mas aqui o foco é
 
 ## Estado atual (18/11/2026)
 
-- **Protótipo navegável pronto**, sem banco e sem login: https://grs2001.github.io/ajuda-automacao/
+- **Protótipo navegável pronto**, sem banco e sem login.
+  - Vercel (principal, para mandar aos eletricistas): endereço `*.vercel.app` — anotar aqui depois de importar o projeto na Vercel.
+  - GitHub Pages (reserva): https://grs2001.github.io/ajuda-automacao/ (muda se o usuário do GitHub for renomeado).
 - Fluxo: Início → Imóvel (só Casa) → Cômodos → Itens por cômodo → Perguntas da instalação → Lista recomendada → Valores → Proposta (PDF + WhatsApp) → Guia de instalação.
 - Regras elétricas R01–R17 implementadas em `src/logica/recomendar.ts` (o dono aprovou as regras em 18/11/2026).
 - **Sugestões de itens por cômodo: adiadas** (`USAR_SUGESTOES = false` em `src/estado/projeto.tsx`). Os itens começam em zero.
@@ -54,7 +56,9 @@ A ideia veio do app "Meu Ajudante" (orçamento de elétrica), mas aqui o foco é
 ## Tecnologia
 
 - **Expo SDK 58** (React Native 0.88, React 19.3, Expo Router, TypeScript). Telas em `src/app/`.
-- Web: `web.output = "single"`; no GitHub Pages o endereço-base vem da variável `BASE_URL` (ver `app.config.ts` e `.github/workflows/pages.yml`).
+- Web: `web.output = "single"`.
+  - Vercel: configurada em `vercel.json` (site na raiz, todo endereço abre o `index.html`). Plano Hobby é só para uso não comercial — trocar de plano quando o app gerar receita.
+  - GitHub Pages: o endereço-base vem da variável `BASE_URL` (ver `app.config.ts` e `.github/workflows/pages.yml`).
 - Armazenamento local: `@react-native-async-storage/async-storage`.
 - PDF: no navegador abre a janela de impressão (`src/logica/pdf.web.ts`); no celular usa expo-print + expo-sharing (`src/logica/pdf.ts`).
 - Desenhos: SVG em `design/ilustracoes/svg/`, convertidos em `src/dados/ilustracoes.ts`. No navegador viram imagem (`Ilustracao.web.tsx`); no celular, react-native-svg (`Ilustracao.tsx`).

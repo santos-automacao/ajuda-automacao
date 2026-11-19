@@ -2,7 +2,7 @@
 
 > Nome provisório. Documento de planejamento, versão 3 — 18/11/2026.
 > Arquivos relacionados: [catálogo](../catalogo/catalogo-casa.xlsx) · [ilustrações](../design/ilustracoes/) · [histórico de decisões](decisoes.md)
-> **Protótipo navegável:** https://grs2001.github.io/ajuda-automacao/ (sem banco e sem login)
+> **Protótipo navegável:** Vercel (`*.vercel.app`, principal) · reserva https://grs2001.github.io/ajuda-automacao/ (sem banco e sem login)
 
 ## 1. Visão
 

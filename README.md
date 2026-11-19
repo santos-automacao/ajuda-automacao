@@ -4,7 +4,7 @@ Assistente para o **eletricista planejar automação residencial**: levantamento
 
 > **Protótipo** — sem banco de dados e sem login. O projeto fica salvo só no aparelho. Os produtos do catálogo ainda estão em verificação.
 
-**Testar no navegador (celular ou notebook):** https://grs2001.github.io/ajuda-automacao/
+**Testar no navegador (celular ou notebook):** endereço da Vercel (`*.vercel.app`) · reserva: https://grs2001.github.io/ajuda-automacao/
 
 ## Como rodar no seu computador
 
@@ -63,7 +63,10 @@ Para mudar um desenho, edite o SVG em `design/ilustracoes/svg/` e rode `npm run 
 
 ## Publicação
 
-Cada `git push` na branch `main` publica o site no GitHub Pages automaticamente (`.github/workflows/pages.yml`).
+Cada `git push` na branch `main` publica o site automaticamente:
+
+- **Vercel** (principal) — configurada em `vercel.json`. Cada branch também ganha um endereço de teste próprio.
+- **GitHub Pages** (reserva) — `.github/workflows/pages.yml`.
 
 ## Documentos
 

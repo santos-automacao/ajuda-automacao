@@ -30,3 +30,5 @@ Registro das conversas de planejamento, para continuar o projeto em qualquer com
 - **Protótipo:** sem banco de dados e sem login (assunto para depois, junto com o login). Foco em usabilidade no notebook e no celular.
 - **Repositório:** público no GitHub (GRS2001/ajuda-automacao), com publicação automática no GitHub Pages para testar no celular pelo navegador.
 - **Contexto para outro computador:** `CLAUDE.md` + este arquivo + `docs/escopo-mvp.md`. A memória local do Claude e a conversa não vão junto para outro notebook.
+- **Hospedagem para os testes:** Vercel (conta do dono, já ligada ao GitHub) passa a ser o endereço principal: link mais curto, links diretos sem erro 404, endereço de teste por branch e Analytics. O GitHub Pages fica como reserva. Atenção: o plano grátis da Vercel é só para uso não comercial.
+- **GitHub:** o dono quer trocar o usuário `GRS2001` por um nome mais profissional. Ao trocar, atualizar o `git remote` nos computadores e os links `grs2001.github.io` nos documentos.
