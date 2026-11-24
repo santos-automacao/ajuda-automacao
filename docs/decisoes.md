@@ -32,3 +32,16 @@ Registro das conversas de planejamento, para continuar o projeto em qualquer com
 - **Contexto para outro computador:** `CLAUDE.md` + este arquivo + `docs/escopo-mvp.md`. A memória local do Claude e a conversa não vão junto para outro notebook.
 - **Hospedagem para os testes:** Vercel (conta do dono, já ligada ao GitHub) passa a ser o endereço principal: link mais curto, links diretos sem erro 404, endereço de teste por branch e Analytics. O GitHub Pages fica como reserva. Atenção: o plano grátis da Vercel é só para uso não comercial.
 - **GitHub:** o dono quer trocar o usuário `GRS2001` por um nome mais profissional. Ao trocar, atualizar o `git remote` nos computadores e os links `grs2001.github.io` nos documentos.
+
+## 23/11/2026 — Catálogo sempre atualizado, produto nacional e banco de dados
+
+- **Skill `atualizar-catalogo`** (`.claude/skills/atualizar-catalogo/`): revisa o catálogo (Anatel, INMETRO, tensão, Alexa/Google, garantia, preço, fora de linha, novidades) e gera um relatório em `relatorios/`. Roda **todo mês** por tarefa agendada e abre um pull request; nada vai para a `main` sem o dono revisar.
+- **Anatel:** desde 08/09/2026 a homologação é na Plataforma Certifica (o SCH antigo só consulta). As duas consultas públicas pediram login em nov/2026, então o nº Anatel vem do datasheet/manual oficial do fabricante. Ideia para depois: uma GitHub Action que baixa os dados abertos da Anatel todo mês.
+- **Produto nacional:** "Fabricado no Brasil" **não é obrigatório**. Produto da China pode entrar, mas o app/relatório **sempre avisa quando existir opção nacional** para o mesmo tipo.
+- **Critério de "Verificado":** nº Anatel em fonte oficial (ou módulo homologado incorporado) + à venda + INMETRO quando for tomada/plugue.
+- **Decisões do relatório de teste:** fechadura Positivo → cadastrar os modelos atuais (Wi-Fi de embutir e Wi-Fi de sobrepor); Rossi → uma linha por tensão (127 V e 220 V); Intelbras → manter as duas linhas (EWS antiga e EIW nova) enquanto estiverem à venda.
+- **Catálogo atualizado (37 produtos, 7 verificados):** IAC 110, iM5 S 4MP, EIW 1002, ECW 1001, ECW 1002, ELW 1001 e IGD 110. Entraram: Rossi 220 V, fechadura Positivo de sobrepor, EIW 1001–1004, tomadas ETW 1001 e ETW 1001+ (falta INMETRO), minicontroladores ECW, lâmpada ELW 1001, acionador de portão IGD 110, centrais Zigbee (Intelbras MCA 1002, NovaDigital HNZ-CB) e cortina motorizada Ekaza.
+- **App da Intelbras:** a linha nova usa o **Mibo Smart** (antes Izy Smart).
+- **Fotos dos produtos:** colunas novas na planilha (foto e fonte). Só foto oficial (fabricante ou API do programa de afiliados).
+- **Banco de dados: Supabase** (PostgreSQL + login), conta criada pelo dono com o GitHub. Estrutura em `supabase/migrations/`: catálogo (leitura pública), perfis, valores de mão de obra, orçamentos (`projetos`, com o projeto inteiro em JSON para funcionar sem internet) e itens de cada orçamento. Cada eletricista só vê os próprios dados (RLS).
+- **"Mais escolhidos pelos eletricistas":** sai da tabela `itens_projeto` pela visão `produtos_mais_escolhidos` (só contagens, sem dados de quem orçou). Começa a funcionar quando o app gravar os orçamentos no banco.

@@ -51,7 +51,9 @@ A ideia veio do app "Meu Ajudante" (orçamento de elétrica), mas aqui o foco é
 1. Testar o protótipo com 3 a 5 eletricistas (de preferência os mais velhos) e anotar onde travam.
 2. Verificar os produtos da planilha (número Anatel + manual) e cadastrar o que falta: tomada inteligente de embutir, motor de cortina, sensores de gás/vazamento/abertura/fumaça, central Zigbee.
 3. Ajustar as telas conforme o teste.
-4. Depois: Supabase (catálogo e login), sincronização na nuvem, link para o cliente aprovar, 3 pacotes, Apartamento e Comércio.
+4. Supabase: aplicar `supabase/migrations/`, carregar o catálogo, tela de login e salvar orçamentos na nuvem (decidido em 23/11/2026).
+5. Mostrar no app a "opção nacional" de cada tipo de aparelho e os "mais escolhidos pelos eletricistas".
+6. Depois: link para o cliente aprovar, 3 pacotes, Apartamento e Comércio.
 
 ## Tecnologia
 
@@ -62,11 +64,13 @@ A ideia veio do app "Meu Ajudante" (orçamento de elétrica), mas aqui o foco é
 - Armazenamento local: `@react-native-async-storage/async-storage`.
 - PDF: no navegador abre a janela de impressão (`src/logica/pdf.web.ts`); no celular usa expo-print + expo-sharing (`src/logica/pdf.ts`).
 - Desenhos: SVG em `design/ilustracoes/svg/`, convertidos em `src/dados/ilustracoes.ts`. No navegador viram imagem (`Ilustracao.web.tsx`); no celular, react-native-svg (`Ilustracao.tsx`).
-- Planilha lida com `read-excel-file` (o exceljs falha com planilhas que têm imagens).
+- Planilha lida com `read-excel-file` (o exceljs falha com planilhas que têm imagens). Para gravar na planilha, editar o XML da aba: openpyxl/exceljs apagam os desenhos.
+- Banco: **Supabase** (PostgreSQL + Auth). Estrutura versionada em `supabase/migrations/`.
+- Catálogo: skill `atualizar-catalogo` (`.claude/skills/`), revisão mensal por tarefa agendada, relatórios em `relatorios/`.
 
 ## Decisões de produto (resumo — detalhes em docs/decisoes.md)
 
 - O app **planeja e recomenda**; o controle da casa fica na **Alexa ou Google Home** (cada marca tem app próprio).
-- Qualidade: homologação Anatel obrigatória, INMETRO quando aplicável, marca com garantia no Brasil. Selo "Fabricado no Brasil" só quando confirmado.
+- Qualidade: homologação Anatel obrigatória, INMETRO quando aplicável, marca com garantia no Brasil. "Fabricado no Brasil" não é obrigatório, mas sempre avisar quando houver opção nacional; o selo só quando confirmado.
 - Monetização: grátis para o eletricista → links de afiliado → plano Pro depois. A comissão **nunca** muda a ordem da recomendação.
 - Fases: 1) Casa com luz, tomada, cortina, ar/TV (infravermelho), portão, fechadura, câmera, sensor · 2) apartamento, comércio, pacotes, aprovação online · 3) solar, pós-venda, parcerias.

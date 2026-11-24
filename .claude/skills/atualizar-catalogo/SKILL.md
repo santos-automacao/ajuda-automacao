@@ -37,6 +37,30 @@ Na dúvida, use o modo relatório.
    preço e se ainda está à venda. Anote a data do preço.
 5. Notícias e blogs servem só para **descobrir** produtos, nunca como prova de homologação.
 
+## Produto nacional (decisão do dono, 23/11/2026)
+
+- Produto fabricado na China pode entrar normalmente: quase tudo vem de lá.
+- Mas **sempre avise quando existir opção nacional** para o mesmo tipo de aparelho: no relatório, em cada tipo,
+  escreva "Opção nacional: <produto>" ou "Nenhuma opção nacional encontrada".
+- Só marque `Fabricado no Brasil = Sim` com fonte (manual, etiqueta ou site do fabricante). Marca brasileira não é o mesmo
+  que fábrica no Brasil.
+
+## Critério para "Verificado"
+
+`Verificado` exige as três coisas:
+1. Nº Anatel confirmado em documento **oficial** do fabricante (datasheet, manual ou loja oficial), ou nos dados abertos
+   da Anatel. "Incorpora produto homologado sob nº X" (módulo) vale, com a observação "(módulo incorporado)".
+2. Produto à venda (loja oficial ou loja grande) na data da verificação.
+3. Para tomada, plugue e adaptador: registro INMETRO confirmado.
+
+Os outros campos podem continuar "Verificar". Produto fora de linha → status `Inativo` (o app deixa de recomendar).
+
+## Fotos dos produtos
+
+Colunas "Foto do produto (URL)" e "Fonte da foto". Use **só** foto oficial: do fabricante (página do produto ou kit de
+imprensa) ou entregue pela API do programa de afiliados da loja. Nunca foto de anúncio de terceiro, de review ou de
+banco de imagens. Sem foto oficial, deixe vazio: o app usa o desenho do item.
+
 ## Critério para "pode vender no Brasil"
 
 - **Rádio (Wi-Fi, Zigbee, Bluetooth, RF 433 MHz)** → homologação Anatel obrigatória.
@@ -52,9 +76,9 @@ Na dúvida, use o modo relatório.
 2. Para **cada produto**, preencha uma linha com: o que estava na planilha → o que achou → fonte (link).
    Campos: `anatel`, `inmetro`, `tensao`, `correnteMax`, `potenciaMax`, `neutro`, `protocolo`,
    `alexa`, `google`, `garantiaMeses`, `fabricadoBrasil`, `preco`, `link`, e se ainda está à venda.
-3. Sugira um `status` novo: **Pronto para aprovar** (tudo confirmado com fonte oficial),
+3. Sugira um `status` novo: **Pronto para aprovar** (atende ao critério de "Verificado" acima),
    **Falta informação** (diga o quê), **Reprovar** (sem Anatel, fora de linha, sem garantia no Brasil).
-   Nunca escreva "Verificado" — essa palavra é do dono.
+   No modo relatório, não grave "Verificado" na planilha: quem aprova é o dono.
 4. **Tipos sem produto**: para cada tipo de aparelho que não tem nenhum produto na planilha, procure
    de 1 a 3 candidatos de marcas com garantia no Brasil, com as mesmas informações.
 5. **Novidades**: procure lançamentos do último mês das marcas já usadas (Intelbras, Positivo, Rossi,
@@ -96,11 +120,15 @@ Responda, por exemplo: "aprovo P001, P004 e os novos N1 e N3; reprova P008".
 ## Modo aplicar
 
 1. Leia o relatório indicado e a resposta do dono. Aplique **só** o que ele aprovou.
-2. Edite `catalogo/catalogo-casa.xlsx` (aba Produtos) preservando as outras abas e formatações.
+2. Edite `catalogo/catalogo-casa.xlsx` (aba Produtos) preservando as outras abas, desenhos e formatações.
+   Cuidado: openpyxl e exceljs **apagam os desenhos** ao salvar. Edite o XML da aba (`xl/worksheets/sheet6.xml`)
+   dentro do .xlsx, ou peça ao dono para colar as linhas no Excel.
    Status aprovado → `Verificado`, `Verificado em` → data de hoje. Produtos novos ganham o próximo ID livre.
 3. Rode `npm run dados`, depois `npm run tipos` e `npm run lint`.
-4. Registre em `docs/decisoes.md` (com data) o que entrou, o que saiu e por quê.
-5. Faça um commit em português numa branch `catalogo/AAAA-MM` e abra um pull request. Não envie direto
+4. Grave também cada mudança na tabela `verificacoes` do Supabase (produto, campo, valor antigo, valor novo, fonte,
+   relatório), quando o banco estiver conectado.
+5. Registre em `docs/decisoes.md` (com data) o que entrou, o que saiu e por quê.
+6. Faça um commit em português numa branch `catalogo/AAAA-MM` e abra um pull request. Não envie direto
    para a `main` (o push na `main` publica o site).
 
 ## Regras que não mudam
