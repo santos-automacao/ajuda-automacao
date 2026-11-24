@@ -80,7 +80,7 @@ const catalogo = {
     id: 'ID', quando: 'Quando acontece', acao: 'O que o app faz', mensagem: 'Mensagem para o eletricista',
     servico: 'Serviço adicionado ao orçamento', base: 'Base',
   }, 'id'),
-  servicos: lerAba('Mão de obra', { servico: 'Serviço', unidade: 'Unidade', valor: 'Valor (R$)' }, 'unidade')
+  servicos: lerAba('Mão de obra', { id: 'ID', servico: 'Serviço', unidade: 'Unidade', valor: 'Valor (R$)' }, 'unidade')
     .map((s) => ({ ...s, valor: typeof s.valor === 'number' ? s.valor : null })),
 };
 

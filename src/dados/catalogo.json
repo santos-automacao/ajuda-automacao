@@ -1764,96 +1764,115 @@
   ],
   "servicos": [
     {
+      "id": "S01",
       "servico": "Instalar interruptor inteligente",
       "unidade": "por interruptor",
       "valor": null
     },
     {
+      "id": "S02",
       "servico": "Instalar módulo relé",
       "unidade": "por módulo",
       "valor": null
     },
     {
+      "id": "S03",
       "servico": "Instalar tomada inteligente",
       "unidade": "por tomada",
       "valor": null
     },
     {
+      "id": "S04",
       "servico": "Configurar plugue ou lâmpada inteligente",
       "unidade": "por unidade",
       "valor": null
     },
     {
+      "id": "S05",
       "servico": "Instalar motor de cortina com trilho",
       "unidade": "por cortina",
       "valor": null
     },
     {
+      "id": "S06",
       "servico": "Instalar controle infravermelho e cadastrar aparelhos",
       "unidade": "por cômodo",
       "valor": null
     },
     {
+      "id": "S07",
       "servico": "Instalar módulo Wi-Fi no portão",
       "unidade": "por portão",
       "valor": null
     },
     {
+      "id": "S08",
       "servico": "Instalar motor de portão",
       "unidade": "por portão",
       "valor": null
     },
     {
+      "id": "S09",
       "servico": "Instalar fechadura digital",
       "unidade": "por porta",
       "valor": null
     },
     {
+      "id": "S10",
       "servico": "Instalar câmera",
       "unidade": "por câmera",
       "valor": null
     },
     {
+      "id": "S11",
       "servico": "Instalar sensor",
       "unidade": "por sensor",
       "valor": null
     },
     {
+      "id": "S12",
       "servico": "Instalar central Zigbee",
       "unidade": "por projeto",
       "valor": null
     },
     {
+      "id": "S13",
       "servico": "Configurar app, cenas e Alexa/Google",
       "unidade": "por projeto",
       "valor": null
     },
     {
+      "id": "S14",
       "servico": "Passar neutro até a caixa",
       "unidade": "por ponto",
       "valor": null
     },
     {
+      "id": "S15",
       "servico": "Circuito exclusivo com disjuntor",
       "unidade": "por circuito",
       "valor": null
     },
     {
+      "id": "S16",
       "servico": "Instalar dispositivo DR",
       "unidade": "por unidade",
       "valor": null
     },
     {
+      "id": "S17",
       "servico": "Troca/ampliação do quadro",
       "unidade": "por quadro",
       "valor": null
     },
     {
+      "id": "S18",
       "servico": "Instalar repetidor ou roteador mesh",
       "unidade": "por unidade",
       "valor": null
     },
     {
+      "id": "S19",
       "servico": "Visita técnica",
       "unidade": "por visita",
       "valor": null

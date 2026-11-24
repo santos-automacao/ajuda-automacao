@@ -44,7 +44,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "dados": "node scripts/gerar-dados.mjs",
+    "dados": "node scripts/gerar-dados.mjs && node scripts/gerar-sql-catalogo.mjs",
     "tipos": "tsc --noEmit",
     "lint": "expo lint",
     "exportar-web": "expo export -p web"

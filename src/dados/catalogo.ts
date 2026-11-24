@@ -91,6 +91,8 @@ export interface Regra {
 }
 
 export interface ServicoCatalogo {
+  /** Código do serviço (S01, S02...). */
+  id: string;
   servico: string;
   unidade: string;
   valor: number | null;

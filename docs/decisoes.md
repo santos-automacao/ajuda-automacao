@@ -45,3 +45,12 @@ Registro das conversas de planejamento, para continuar o projeto em qualquer com
 - **Fotos dos produtos:** colunas novas na planilha (foto e fonte). Só foto oficial (fabricante ou API do programa de afiliados).
 - **Banco de dados: Supabase** (PostgreSQL + login), conta criada pelo dono com o GitHub. Estrutura em `supabase/migrations/`: catálogo (leitura pública), perfis, valores de mão de obra, orçamentos (`projetos`, com o projeto inteiro em JSON para funcionar sem internet) e itens de cada orçamento. Cada eletricista só vê os próprios dados (RLS).
 - **"Mais escolhidos pelos eletricistas":** sai da tabela `itens_projeto` pela visão `produtos_mais_escolhidos` (só contagens, sem dados de quem orçou). Começa a funcionar quando o app gravar os orçamentos no banco.
+
+## 23/11/2026 (noite) — Banco de dados criado
+
+- **Projeto Supabase `ajuda-automacao-sp`**, região **São Paulo (sa-east-1)**, plano grátis. O primeiro projeto (`ajuda-automacao`, nos EUA) ficou vazio e pode ser apagado no painel.
+- **Catálogo com colunas de verdade:** uma tabela por aba da planilha (`imoveis`, `tipos_aparelho`, `itens`, `comodos`, `servicos`, `regras_eletricas`, `produtos`) + `verificacoes` (histórico da skill).
+- **Mão de obra ganhou código:** coluna ID na aba (S01 a S19). As regras elétricas apontam para o serviço pelo código (`servico_id`).
+- **Item "sensor":** o tipo padrão fica vazio no banco; o tipo vem do cômodo (`comodos.sensor_sugerido`).
+- **Carga do catálogo:** `npm run dados` agora também gera `supabase/seed/catalogo.sql` (insere ou atualiza; pode rodar quantas vezes quiser). Catálogo carregado: 37 produtos, 7 verificados.
+- **Avisos do Supabase aceitos de propósito:** `verificacoes` sem policy (só o administrador lê) e a função `produtos_mais_escolhidos()` com permissão de administrador (soma todos os orçamentos, mas só devolve números).

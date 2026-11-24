@@ -124,7 +124,8 @@ Responda, por exemplo: "aprovo P001, P004 e os novos N1 e N3; reprova P008".
    Cuidado: openpyxl e exceljs **apagam os desenhos** ao salvar. Edite o XML da aba (`xl/worksheets/sheet6.xml`)
    dentro do .xlsx, ou peça ao dono para colar as linhas no Excel.
    Status aprovado → `Verificado`, `Verificado em` → data de hoje. Produtos novos ganham o próximo ID livre.
-3. Rode `npm run dados`, depois `npm run tipos` e `npm run lint`.
+3. Rode `npm run dados` (gera também `supabase/seed/catalogo.sql`), depois `npm run tipos` e `npm run lint`.
+   Com o conector do Supabase, rode o `catalogo.sql` no projeto `ajuda-automacao-sp` para o banco ficar igual à planilha.
 4. Grave também cada mudança na tabela `verificacoes` do Supabase (produto, campo, valor antigo, valor novo, fonte,
    relatório), quando o banco estiver conectado.
 5. Registre em `docs/decisoes.md` (com data) o que entrou, o que saiu e por quê.
