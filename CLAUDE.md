@@ -35,6 +35,14 @@ A ideia veio do app "Meu Ajudante" (orçamento de elétrica), mas aqui o foco é
 - Palavras de eletricista, não de informática ("teclas do interruptor", "fio neutro", "127 V (110)").
 - Funciona sem internet; salva sozinho a cada toque.
 
+## Onde paramos (24/11/2026)
+
+- Trabalho na branch **`skill/atualizar-catalogo`** (pull request #1, ainda **não** juntado na `main`).
+- No computador de casa: `npm run dados`, `npm run tipos` e `npm run lint` passaram; o catálogo gerado bateu com o do Claude (só mudou a data de geração).
+- **Falta antes do merge:** `npm run exportar-web` e testar a lista recomendada no navegador (390 px e 1366 px).
+- Para continuar em outro computador: `git fetch origin` → `git checkout skill/atualizar-catalogo` → `git pull` → `npm install`.
+- Depois do merge: ligar o app ao Supabase (1. catálogo vindo do banco, 2. login, 3. orçamentos na nuvem).
+
 ## Estado atual (18/11/2026)
 
 - **Protótipo navegável pronto**, sem banco e sem login.
