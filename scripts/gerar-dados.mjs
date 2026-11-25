@@ -74,13 +74,13 @@ const catalogo = {
     teclas: 'Teclas / canais', alimentacao: 'Alimentação', anatel: 'Nº Anatel', inmetro: 'INMETRO',
     fabricadoBrasil: 'Fabricado no Brasil', garantiaMeses: 'Garantia (meses)', preco: 'Preço de referência (R$)',
     link: 'Link de compra', fonte: 'Fonte da informação', status: 'Status', verificadoEm: 'Verificado em',
-    observacoes: 'Observações',
+    observacoes: 'Observações', fotoUrl: 'Foto do produto (URL)', fotoFonte: 'Fonte da foto',
   }, 'id').map((p) => ({ ...p, preco: typeof p.preco === 'number' ? p.preco : null })),
   regras: lerAba('Regras elétricas', {
     id: 'ID', quando: 'Quando acontece', acao: 'O que o app faz', mensagem: 'Mensagem para o eletricista',
     servico: 'Serviço adicionado ao orçamento', base: 'Base',
   }, 'id'),
-  servicos: lerAba('Mão de obra', { servico: 'Serviço', unidade: 'Unidade', valor: 'Valor (R$)' }, 'unidade')
+  servicos: lerAba('Mão de obra', { id: 'ID', servico: 'Serviço', unidade: 'Unidade', valor: 'Valor (R$)' }, 'unidade')
     .map((s) => ({ ...s, valor: typeof s.valor === 'number' ? s.valor : null })),
 };
 

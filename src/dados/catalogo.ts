@@ -76,6 +76,9 @@ export interface Produto {
   status: string;
   verificadoEm: string | null;
   observacoes: string | null;
+  /** Foto oficial do produto (fabricante ou loja afiliada). */
+  fotoUrl: string | null;
+  fotoFonte: string | null;
 }
 
 export interface Regra {
@@ -88,6 +91,8 @@ export interface Regra {
 }
 
 export interface ServicoCatalogo {
+  /** Código do serviço (S01, S02...). */
+  id: string;
   servico: string;
   unidade: string;
   valor: number | null;
