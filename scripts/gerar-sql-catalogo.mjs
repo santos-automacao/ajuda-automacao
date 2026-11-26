@@ -45,10 +45,12 @@ const ITENS = ['luz', 'tomada', 'cortina', 'ar_condicionado', 'tv', 'portao', 'f
 
 let sql = `-- Gerado por scripts/gerar-sql-catalogo.mjs em ${new Date().toISOString()} — não edite à mão.\nbegin;\n\n`;
 
-sql += upsert('tipos_aparelho', ['id', 'item', 'nome', 'para_que', 'neutro', 'central', 'alimentacao', 'cuidados', 'passos'],
-  cat.tipos.map((t) => [v(t.id), v(t.item), v(t.nome), v(t.paraQue), v(t.neutro), v(t.central), v(t.alimentacao), v(t.cuidados), v(t.passos)]));
+// "ordem" = posição na aba (o app mostra nessa ordem).
+sql += upsert('tipos_aparelho', ['id', 'ordem', 'item', 'nome', 'para_que', 'neutro', 'central', 'alimentacao', 'cuidados', 'passos'],
+  cat.tipos.map((t, n) => [v(t.id), v(n + 1, 'int'), v(t.item), v(t.nome), v(t.paraQue), v(t.neutro), v(t.central), v(t.alimentacao), v(t.cuidados), v(t.passos)]));
 
-sql += upsert('imoveis', ['id', 'nome', 'situacao'], cat.imoveis.map((i) => [v(i.id), v(i.nome), v(i.situacao)]));
+sql += upsert('imoveis', ['id', 'ordem', 'nome', 'situacao'],
+  cat.imoveis.map((i, n) => [v(i.id), v(n + 1, 'int'), v(i.nome), v(i.situacao)]));
 
 sql += upsert('itens', ['id', 'ordem', 'botao', 'pergunta', 'ajuda', 'tipo_padrao', 'outros_tipos'],
   cat.itens.map((i) => [v(i.id), v(i.ordem, 'int'), v(i.botao), v(i.pergunta), v(i.ajuda), v(tipo(i.tipoPadrao)), v(i.outrosTipos ?? [], 'array')]));
@@ -67,9 +69,12 @@ sql += upsert('produtos',
     'potencia_max', 'teclas', 'alimentacao', 'anatel', 'inmetro', 'fabricado_brasil', 'garantia_meses', 'preco', 'link', 'fonte',
     'foto_url', 'foto_fonte', 'status', 'verificado_em', 'observacoes'],
   cat.produtos.map((p) => [v(p.id), v(p.item), v(p.tipo), v(p.marca), v(p.modelo), v(p.nome), v(p.app), v(p.alexa), v(p.google),
-    v(p.protocolo), v(p.neutro), v(p.tensao), v(p.correnteMax), v(p.potenciaMax), v(p.teclas, 'int'), v(p.alimentacao), v(p.anatel),
+    v(p.protocolo), v(p.neutro), v(p.tensao), v(p.correnteMax), v(p.potenciaMax), v(p.teclas), v(p.alimentacao), v(p.anatel),
     v(p.inmetro), v(p.fabricadoBrasil), v(p.garantiaMeses, 'int'), v(p.preco, 'num'), v(p.link), v(p.fonte), v(p.fotoUrl),
     v(p.fotoFonte), v(p.status), v(/^\d{4}-\d{2}-\d{2}$/.test(p.verificadoEm ?? '') ? p.verificadoEm : null), v(p.observacoes)]));
+
+// Data do catálogo: o app compara para saber qual cópia é a mais nova.
+sql += upsert('catalogo_info', ['id', 'gerado_em'], [[v(1, 'int'), v(cat.geradoEm)]]);
 
 sql += 'commit;\n';
 fs.mkdirSync(path.join(raiz, 'supabase', 'seed'), { recursive: true });
