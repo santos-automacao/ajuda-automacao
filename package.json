@@ -47,7 +47,8 @@
     "dados": "node scripts/gerar-dados.mjs && node scripts/gerar-sql-catalogo.mjs",
     "tipos": "tsc --noEmit",
     "lint": "expo lint",
-    "exportar-web": "expo export -p web"
+    "exportar-web": "expo export -p web",
+    "testes": "node --test scripts/testes/"
   },
   "private": true
 }

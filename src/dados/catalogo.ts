@@ -98,7 +98,7 @@ export interface ServicoCatalogo {
   valor: number | null;
 }
 
-interface Catalogo {
+export interface Catalogo {
   geradoEm: string;
   imoveis: Imovel[];
   comodos: ComodoTipo[];
