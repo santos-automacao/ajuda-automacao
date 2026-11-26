@@ -128,8 +128,9 @@ Responda, por exemplo: "aprovo P001, P004 e os novos N1 e N3; reprova P008".
    Com o conector do Supabase, rode o `catalogo.sql` no projeto `ajuda-automacao-sp` para o banco ficar igual à planilha.
    Depois rode `npm run comparar-catalogo`: tem que dizer "Catálogo do banco igual ao catalogo.json".
    (O app baixa o catálogo do banco; se o banco ficar diferente da planilha, o eletricista vê o do banco.)
-   Produto que saiu de linha: marque `Inativo` na planilha, **não apague a linha** (o `catalogo.sql` apaga do
-   banco o que sumiu da planilha, e isso vai apagar orçamentos quando eles estiverem na nuvem).
+   Produto que saiu de linha: marque `Inativo` na planilha (prefira a apagar a linha). Produto nunca é apagado do
+   banco: se a linha sumir da planilha, o `catalogo.sql` marca `Inativo` e o `comparar-catalogo` mostra um aviso.
+   As outras abas (regras, serviços, cômodos, itens, tipos, imóveis) são apagadas do banco quando saem da planilha.
 4. Grave também cada mudança na tabela `verificacoes` do Supabase (produto, campo, valor antigo, valor novo, fonte,
    relatório), quando o banco estiver conectado.
 5. Registre em `docs/decisoes.md` (com data) o que entrou, o que saiu e por quê.

@@ -64,3 +64,4 @@ Registro das conversas de planejamento, para continuar o projeto em qualquer com
 - **Chave do Supabase:** a chave **pública** (publishable) fica no arquivo `.env`, que vai para o GitHub; assim Vercel e GitHub Pages recebem sem configurar nada. A chave secreta nunca entra no projeto.
 - **Backup (correção):** a planilha tem backup no GitHub a cada commit. O plano grátis do Supabase **não** tem backup automático restaurável: assinar o plano Pro do Supabase quando o app tiver assinantes.
 - **Testes:** `npm run testes` (conversão banco → catálogo) e `npm run comparar-catalogo` (banco = planilha).
+- **Produto nunca é apagado do banco (decisão do dono):** se sair da planilha, vira `Inativo`. O código (P001...) continua valendo para orçamentos antigos, e o app não recomenda produto inativo. As outras abas são apagadas quando saem da planilha.
