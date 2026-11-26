@@ -76,8 +76,25 @@ sql += upsert('produtos',
 // Data do catálogo: o app compara para saber qual cópia é a mais nova.
 sql += upsert('catalogo_info', ['id', 'gerado_em'], [[v(1, 'int'), v(cat.geradoEm)]]);
 
+// Apaga do banco o que saiu da planilha (o app lê o banco; linha velha apareceria para o eletricista).
+// Depois dos inserts e dos "filhos" para os "pais", por causa das chaves estrangeiras.
+// ATENÇÃO (etapa 3, orçamentos na nuvem): itens_projeto apaga em cascata junto com o produto.
+// Antes disso, trocar a exclusão de produtos por status 'Inativo'. Até lá, para tirar um produto
+// de linha, marque "Inativo" na planilha em vez de apagar a linha.
+const apagar = (tabela, lista) => `delete from public.${tabela} where id not in (${lista.map((x) => v(x.id)).join(', ')});\n`;
+sql += apagar('produtos', cat.produtos);
+sql += apagar('regras_eletricas', cat.regras);
+sql += apagar('itens', cat.itens);
+sql += apagar('comodos', cat.comodos);
+sql += apagar('imoveis', cat.imoveis);
+sql += apagar('tipos_aparelho', cat.tipos);
+sql += apagar('servicos', cat.servicos);
+sql += '\n';
+
 sql += 'commit;\n';
-fs.mkdirSync(path.join(raiz, 'supabase', 'seed'), { recursive: true });
-fs.writeFileSync(path.join(raiz, 'supabase', 'seed', 'catalogo.sql'), sql);
+// Destino opcional (os testes gravam num arquivo temporário).
+const destino = process.argv[2] ?? path.join(raiz, 'supabase', 'seed', 'catalogo.sql');
+fs.mkdirSync(path.dirname(destino), { recursive: true });
+fs.writeFileSync(destino, sql);
 console.log(`supabase/seed/catalogo.sql: ${cat.tipos.length} tipos, ${cat.itens.length} itens, ${cat.comodos.length} cômodos, ` +
   `${cat.servicos.length} serviços, ${cat.regras.length} regras, ${cat.produtos.length} produtos.`);

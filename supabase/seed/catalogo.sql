@@ -1,4 +1,4 @@
--- Gerado por scripts/gerar-sql-catalogo.mjs em 2026-11-26T12:07:43.532Z — não edite à mão.
+-- Gerado por scripts/gerar-sql-catalogo.mjs em 2026-11-26T12:21:43.906Z — não edite à mão.
 begin;
 
 insert into public.tipos_aparelho (id, ordem, item, nome, para_que, neutro, central, alimentacao, cuidados, passos) values
@@ -140,5 +140,13 @@ on conflict (id) do update set item = excluded.item, tipo = excluded.tipo, marca
 insert into public.catalogo_info (id, gerado_em) values
   (1, '2026-11-26T12:07:38.239Z')
 on conflict (id) do update set gerado_em = excluded.gerado_em;
+
+delete from public.produtos where id not in ('P001', 'P002', 'P003', 'P004', 'P005', 'P006', 'P007', 'P008', 'P009', 'P010', 'P011', 'P012', 'P013', 'P014', 'P015', 'P016', 'P017', 'P018', 'P019', 'P020', 'P021', 'P022', 'P023', 'P024', 'P025', 'P026', 'P027', 'P028', 'P029', 'P030', 'P031', 'P032', 'P033', 'P034', 'P035', 'P036', 'P037');
+delete from public.regras_eletricas where id not in ('R01', 'R02', 'R03', 'R04', 'R05', 'R06', 'R07', 'R08', 'R09', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'R16', 'R17');
+delete from public.itens where id not in ('luz', 'tomada', 'cortina', 'ar_condicionado', 'tv', 'portao', 'fechadura', 'camera', 'sensor');
+delete from public.comodos where id not in ('sala', 'quarto', 'cozinha', 'banheiro', 'area_servico', 'garagem', 'area_externa', 'varanda', 'escritorio', 'entrada');
+delete from public.imoveis where id not in ('casa', 'apartamento', 'comercio');
+delete from public.tipos_aparelho where id not in ('INT_TOUCH', 'MOD_RELE', 'DIMMER', 'LAMPADA', 'TOMADA_EMBUTIR', 'PLUGUE', 'CORTINA_MOTOR', 'CORTINA_CONTROLADOR', 'IR_UNIVERSAL', 'PORTAO_MODULO', 'PORTAO_MOTOR', 'FECHADURA', 'CAMERA_INTERNA', 'CAMERA_EXTERNA_IA', 'SENSOR_PRESENCA', 'SENSOR_ABERTURA', 'SENSOR_VAZAMENTO', 'SENSOR_GAS', 'SENSOR_FUMACA', 'CENTRAL_ZIGBEE');
+delete from public.servicos where id not in ('S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07', 'S08', 'S09', 'S10', 'S11', 'S12', 'S13', 'S14', 'S15', 'S16', 'S17', 'S18', 'S19');
 
 commit;
