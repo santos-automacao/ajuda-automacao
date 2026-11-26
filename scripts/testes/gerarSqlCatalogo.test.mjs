@@ -17,21 +17,26 @@ function gerarSql() {
   return readFileSync(saida, 'utf8');
 }
 
-test('apaga do banco o que saiu da planilha', () => {
+test('produto que saiu da planilha fica Inativo no banco (nunca é apagado)', () => {
   const sql = gerarSql();
-  for (const tabela of ['produtos', 'regras_eletricas', 'itens', 'comodos', 'imoveis', 'tipos_aparelho', 'servicos']) {
-    assert.match(sql, new RegExp(`delete from public\\.${tabela} where id not in \\(`), tabela);
-  }
-  const apagarProdutos = sql.match(/delete from public\.produtos where id not in \(([^)]*)\)/)[1];
-  assert.equal(apagarProdutos.split(',').length, catalogo.produtos.length);
-  assert.ok(apagarProdutos.includes("'P037'"));
+  assert.doesNotMatch(sql, /delete from public\.produtos/);
+  const inativar = sql.match(/update public\.produtos set status = 'Inativo' where id not in \(([^)]*)\)/);
+  assert.ok(inativar, 'falta o update que inativa');
+  assert.equal(inativar[1].split(',').length, catalogo.produtos.length);
+  assert.ok(inativar[1].includes("'P037'"));
 });
 
-test('apaga depois de inserir, e os filhos antes dos pais', () => {
+test('as outras abas: apaga do banco o que saiu da planilha', () => {
+  const sql = gerarSql();
+  for (const tabela of ['regras_eletricas', 'itens', 'comodos', 'imoveis', 'tipos_aparelho', 'servicos']) {
+    assert.match(sql, new RegExp(`delete from public\\.${tabela} where id not in \\(`), tabela);
+  }
+});
+
+test('inativa/apaga depois de inserir, e os filhos antes dos pais', () => {
   const sql = gerarSql();
   const pos = (trecho) => sql.indexOf(trecho);
-  assert.ok(pos('delete from public.produtos') > pos('insert into public.produtos'), 'produtos: insere antes de apagar');
-  assert.ok(pos('delete from public.produtos') < pos('delete from public.tipos_aparelho'), 'produto antes do tipo');
+  assert.ok(pos("update public.produtos set status = 'Inativo'") > pos('insert into public.produtos'), 'insere antes de inativar');
   assert.ok(pos('delete from public.itens') < pos('delete from public.tipos_aparelho'), 'item antes do tipo');
   assert.ok(pos('delete from public.comodos') < pos('delete from public.tipos_aparelho'), 'cômodo antes do tipo');
   assert.ok(pos('delete from public.regras_eletricas') < pos('delete from public.servicos'), 'regra antes do serviço');

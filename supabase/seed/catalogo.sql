@@ -1,4 +1,4 @@
--- Gerado por scripts/gerar-sql-catalogo.mjs em 2026-11-26T12:21:43.906Z — não edite à mão.
+-- Gerado por scripts/gerar-sql-catalogo.mjs em 2026-11-26T12:42:52.475Z — não edite à mão.
 begin;
 
 insert into public.tipos_aparelho (id, ordem, item, nome, para_que, neutro, central, alimentacao, cuidados, passos) values
@@ -141,7 +141,7 @@ insert into public.catalogo_info (id, gerado_em) values
   (1, '2026-11-26T12:07:38.239Z')
 on conflict (id) do update set gerado_em = excluded.gerado_em;
 
-delete from public.produtos where id not in ('P001', 'P002', 'P003', 'P004', 'P005', 'P006', 'P007', 'P008', 'P009', 'P010', 'P011', 'P012', 'P013', 'P014', 'P015', 'P016', 'P017', 'P018', 'P019', 'P020', 'P021', 'P022', 'P023', 'P024', 'P025', 'P026', 'P027', 'P028', 'P029', 'P030', 'P031', 'P032', 'P033', 'P034', 'P035', 'P036', 'P037');
+update public.produtos set status = 'Inativo' where id not in ('P001', 'P002', 'P003', 'P004', 'P005', 'P006', 'P007', 'P008', 'P009', 'P010', 'P011', 'P012', 'P013', 'P014', 'P015', 'P016', 'P017', 'P018', 'P019', 'P020', 'P021', 'P022', 'P023', 'P024', 'P025', 'P026', 'P027', 'P028', 'P029', 'P030', 'P031', 'P032', 'P033', 'P034', 'P035', 'P036', 'P037') and status <> 'Inativo';
 delete from public.regras_eletricas where id not in ('R01', 'R02', 'R03', 'R04', 'R05', 'R06', 'R07', 'R08', 'R09', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'R16', 'R17');
 delete from public.itens where id not in ('luz', 'tomada', 'cortina', 'ar_condicionado', 'tv', 'portao', 'fechadura', 'camera', 'sensor');
 delete from public.comodos where id not in ('sala', 'quarto', 'cozinha', 'banheiro', 'area_servico', 'garagem', 'area_externa', 'varanda', 'escritorio', 'entrada');
