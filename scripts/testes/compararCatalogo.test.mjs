@@ -9,7 +9,7 @@ const planilha = JSON.parse(readFileSync(new URL('../../src/dados/catalogo.json'
 const copia = () => structuredClone(planilha);
 
 test('iguais: sem diferenças nem avisos', () => {
-  assert.deepEqual(compararCatalogos(copia(), copia()), { diferencas: [], avisos: [] });
+  assert.deepEqual(compararCatalogos(copia(), copia()), { diferencas: [] });
 });
 
 test('acusa valor diferente e ordem diferente', () => {
@@ -21,19 +21,10 @@ test('acusa valor diferente e ordem diferente', () => {
   assert.ok(diferencas.includes('catalogo.imoveis: ordem diferente'));
 });
 
-test('produto que só existe no banco e está Inativo é aviso, não diferença', () => {
+test('produto que só existe no banco é diferença, mesmo com status Inativo', () => {
+  // O banco só manda registros atuais (stareg A): o que saiu da planilha já não vem.
   const banco = copia();
   banco.produtos.push({ ...planilha.produtos[0], id: 'P999', status: 'Inativo' });
-  assert.deepEqual(compararCatalogos(banco, planilha), {
-    diferencas: [],
-    avisos: ['P999 está só no banco, Inativo (saiu da planilha)'],
-  });
-});
-
-test('produto que só existe no banco e NÃO está Inativo é diferença', () => {
-  const banco = copia();
-  banco.produtos.push({ ...planilha.produtos[0], id: 'P999', status: 'A verificar' });
-  const { diferencas, avisos } = compararCatalogos(banco, planilha);
+  const { diferencas } = compararCatalogos(banco, planilha);
   assert.ok(diferencas.some((d) => d.startsWith('catalogo.produtos[P999]')), diferencas.join('\n'));
-  assert.deepEqual(avisos, []);
 });

@@ -39,6 +39,7 @@ A ideia veio do app "Meu Ajudante" (orçamento de elétrica), mas aqui o foco é
 
 - PR #1 (`skill/atualizar-catalogo`) **juntado na `main`** em 25/11; a Vercel publicou sozinha (ela publica a cada push na `main`).
 - Trabalho na branch **`catalogo-do-banco`**: o app lê o catálogo do Supabase e guarda cópia no aparelho (projeto em `docs/superpowers/specs/2026-11-26-catalogo-do-banco-design.md`, plano em `docs/superpowers/plans/`). Banco já atualizado (migração `20261126000000_catalogo_do_banco.sql` aplicada).
+- Catálogo com histórico (migração `20261126010000_historico_catalogo.sql`): nas 7 tabelas, `id` = registro, `codigo` = código da planilha, `stareg` A/I. Nada é apagado; o orçamento guarda id + código.
 - Para continuar em outro computador: `git fetch origin` → `git checkout catalogo-do-banco` → `git pull` → `npm install`.
 - Próximo: 2. login, 3. orçamentos na nuvem (daí sai o "mais escolhidos").
 

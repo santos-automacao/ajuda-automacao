@@ -4,13 +4,21 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
-import { catalogoValido, maisNovo, montarCatalogo } from '../../src/dados/catalogoBanco.ts';
+import { buscarLinhas, catalogoValido, maisNovo, montarCatalogo } from '../../src/dados/catalogoBanco.ts';
 
 const doApp = JSON.parse(readFileSync(new URL('../../src/dados/catalogo.json', import.meta.url), 'utf8'));
 
+/**
+ * Como o banco devolve: o código da planilha fica em "codigo"; "id" é o número do registro
+ * (de propósito em ordem contrária ao código, para pegar quem ordenar ou usar o id errado).
+ */
+function comoNoBanco(lista) {
+  return lista.map(({ id, ...resto }, n) => ({ id: 900 - n, codigo: id, stareg: 'A', criado_em: '2026-11-26T00:00:00Z', ...resto }));
+}
+
 /** Linhas mínimas do banco, uma de cada tabela; cada teste muda só o que precisa. */
 function linhas(mudar = {}) {
-  return {
+  const l = {
     catalogo_info: [{ id: 1, gerado_em: '2026-11-26 12:07:38.239+00' }],
     imoveis: [{ id: 'casa', ordem: 1, nome: 'Casa', situacao: 'Ativo no MVP' }],
     comodos: [{
@@ -24,10 +32,12 @@ function linhas(mudar = {}) {
       central: 'Não', alimentacao: 'Rede', cuidados: 'Cuidado', passos: '1. Desligue.',
     }],
     produtos: [produto('P001')],
-    regras_eletricas: [{ id: 'R01', quando: 'Q', acao: 'A', mensagem: 'M', servico: '—', servico_id: null, base: 'B' }],
+    regras_eletricas: [{ id: 'R01', quando: 'Q', acao: 'A', mensagem: 'M', servico: '—', servico_codigo: null, base: 'B' }],
     servicos: [{ id: 'S01', nome: 'Instalar', unidade: 'por unidade', valor_referencia: null }],
     ...mudar,
   };
+  for (const t of Object.keys(l)) if (t !== 'catalogo_info') l[t] = comoNoBanco(l[t]);
+  return l;
 }
 
 function produto(id, mudar = {}) {
@@ -103,4 +113,34 @@ test('maisNovo fica com a cópia de data mais nova; empate fica com a do app', (
   assert.equal(maisNovo(doApp, velho), doApp);
   assert.equal(maisNovo(doApp, igual), doApp);
   assert.equal(maisNovo(doApp, null), doApp);
+});
+
+test('o código da planilha vira o id do app (o número do registro não entra)', () => {
+  const c = montarCatalogo(linhas());
+  assert.equal(c.produtos[0].id, 'P001');
+  assert.equal(c.servicos[0].id, 'S01');
+  assert.equal(c.imoveis[0].id, 'casa');
+  for (const k of ['codigo', 'stareg', 'criadoEm', 'criado_em']) assert.equal(k in c.produtos[0], false, k);
+});
+
+test('buscarLinhas baixa só os registros atuais (stareg A) das 7 tabelas', async () => {
+  const pedidos = [];
+  const resposta = { data: [], error: null };
+  const cliente = {
+    from(tabela) {
+      return {
+        select(colunas) {
+          const consulta = Promise.resolve(resposta);
+          consulta.eq = (coluna, valor) => { pedidos.push(`${tabela}:${coluna}=${valor}`); return Promise.resolve(resposta); };
+          pedidos.push(`${tabela}:${colunas}`);
+          return consulta;
+        },
+      };
+    },
+  };
+  await buscarLinhas(cliente);
+  for (const t of ['imoveis', 'comodos', 'itens', 'tipos_aparelho', 'produtos', 'regras_eletricas', 'servicos']) {
+    assert.ok(pedidos.includes(`${t}:stareg=A`), t);
+  }
+  assert.ok(!pedidos.includes('catalogo_info:stareg=A'));
 });

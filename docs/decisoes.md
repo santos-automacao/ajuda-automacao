@@ -64,4 +64,12 @@ Registro das conversas de planejamento, para continuar o projeto em qualquer com
 - **Chave do Supabase:** a chave **pública** (publishable) fica no arquivo `.env`, que vai para o GitHub; assim Vercel e GitHub Pages recebem sem configurar nada. A chave secreta nunca entra no projeto.
 - **Backup (correção):** a planilha tem backup no GitHub a cada commit. O plano grátis do Supabase **não** tem backup automático restaurável: assinar o plano Pro do Supabase quando o app tiver assinantes.
 - **Testes:** `npm run testes` (conversão banco → catálogo) e `npm run comparar-catalogo` (banco = planilha).
-- **Produto nunca é apagado do banco (decisão do dono):** se sair da planilha, vira `Inativo`. O código (P001...) continua valendo para orçamentos antigos, e o app não recomenda produto inativo. As outras abas são apagadas quando saem da planilha.
+- **Produto nunca é apagado do banco (decisão do dono):** se sair da planilha, o registro fica inativo (`stareg = 'I'`, ver abaixo). Vale para as 7 tabelas.
+- **Número do orçamento (dono deixou a escolha com o Claude):** sequência por eletricista (nº 1, 2, 3...), dada **pelo banco** quando o orçamento chega à nuvem. Assim celular e notebook nunca dão o mesmo número. Como o WhatsApp já precisa de internet, na hora de mandar a proposta o número quase sempre já existe; sem internet, o orçamento aparece como "nº a definir" e recebe o número na primeira conexão. Entra na etapa 3 (orçamentos na nuvem).
+- **Histórico do catálogo (decisão do dono, 26/11/2026):** sem tabela de versões (guardaria cópia do que não mudou). Cada uma das 7 tabelas ganha `id` (um por registro) + código (P001...) + `stareg` (A = ativo, I = inativo). Mudou alguma coisa: o registro antigo vira I e entra um registro novo com id novo e o mesmo código. O orçamento guarda id + código. Detalhes aprovados:
+  - A coluna se chama `codigo` nas 7 tabelas, com o código da planilha (P001, S01, R01, INT_TOUCH, sala...). O `id` é um número (1, 2, 3...) dado pelo banco.
+  - Qualquer coluna que mudar gera registro novo. Carga sem mudança não grava nada. Nada é apagado.
+  - Uma tabela aponta para a outra pelo **código** (ex.: regra → serviço "S05"), não pelo id. Por isso saíram as chaves estrangeiras entre as tabelas do catálogo; quem confere os códigos é o gerador do SQL.
+  - A coluna Status da planilha (Verificado / A verificar / Inativo = fora de linha) continua igual. O `stareg` só diz se aquele registro é o atual.
+  - O app baixa só os registros `A`. `itens_projeto` guarda `produto_id` (registro exato) + `produto_codigo`. O "mais escolhidos" soma pelo código.
+  - Falta para a etapa 3: o app saber o id do registro de cada produto do orçamento.

@@ -1,17 +1,10 @@
 // Compara o catálogo montado do banco com o da planilha (catalogo.json), campo a campo.
 // Usado por scripts/comparar-catalogo-banco.mjs; testes em scripts/testes/compararCatalogo.test.mjs.
+// O banco só manda os registros atuais (stareg 'A'); os antigos (histórico) não entram na comparação.
 
-/**
- * @returns {{ diferencas: string[], avisos: string[] }}
- * Produto que só existe no banco e está Inativo é AVISO (saiu da planilha e foi inativado de propósito).
- */
+/** @returns {{ diferencas: string[] }} */
 export function compararCatalogos(banco, planilha) {
   const diferencas = [];
-  const avisos = [];
-  const idsPlanilha = new Set(planilha.produtos.map((p) => p.id));
-  const inativosSoNoBanco = banco.produtos.filter((p) => !idsPlanilha.has(p.id) && p.status === 'Inativo');
-  for (const p of inativosSoNoBanco) avisos.push(`${p.id} está só no banco, Inativo (saiu da planilha)`);
-  const bancoSemEles = { ...banco, produtos: banco.produtos.filter((p) => !inativosSoNoBanco.includes(p)) };
 
   /** Listas de objetos com "id" são casadas pelo id. */
   function comparar(a, b, caminho) {
@@ -29,6 +22,6 @@ export function compararCatalogos(banco, planilha) {
     diferencas.push(`${caminho}: banco ${JSON.stringify(a)} ≠ planilha ${JSON.stringify(b)}`);
   }
 
-  comparar(bancoSemEles, planilha, 'catalogo');
-  return { diferencas, avisos };
+  comparar(banco, planilha, 'catalogo');
+  return { diferencas };
 }

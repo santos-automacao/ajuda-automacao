@@ -20,8 +20,7 @@ const doBanco = montarCatalogo(await buscarLinhas(cliente));
 const arquivo = process.argv[2] ?? new URL('../src/dados/catalogo.json', import.meta.url);
 const doApp = JSON.parse(readFileSync(arquivo, 'utf8'));
 
-const { diferencas, avisos } = compararCatalogos(doBanco, doApp);
-for (const aviso of avisos) console.log(`Aviso: ${aviso}`);
+const { diferencas } = compararCatalogos(doBanco, doApp);
 if (diferencas.length) {
   console.error(`${diferencas.length} diferença(s):\n` + diferencas.join('\n'));
   process.exit(1);

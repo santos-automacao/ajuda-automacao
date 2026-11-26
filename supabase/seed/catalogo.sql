@@ -1,7 +1,9 @@
--- Gerado por scripts/gerar-sql-catalogo.mjs em 2026-11-26T12:42:52.475Z — não edite à mão.
+-- Gerado por scripts/gerar-sql-catalogo.mjs em 2026-11-26T14:54:00.144Z — não edite à mão.
 begin;
 
-insert into public.tipos_aparelho (id, ordem, item, nome, para_que, neutro, central, alimentacao, cuidados, passos) values
+-- tipos_aparelho
+create temp table novo_tipos_aparelho on commit drop as select codigo, ordem, item, nome, para_que, neutro, central, alimentacao, cuidados, passos from public.tipos_aparelho with no data;
+insert into novo_tipos_aparelho (codigo, ordem, item, nome, para_que, neutro, central, alimentacao, cuidados, passos) values
   ('INT_TOUCH', 1, 'luz', 'Interruptor inteligente (1 a 4 teclas)', 'Troca o interruptor comum. Liga pelo toque, pelo celular e por voz.', 'Sim (maioria)', 'Só se for Zigbee', 'Rede elétrica', 'Confirmar neutro na caixa 4x2. Respeitar a corrente máxima por tecla.', '1. Desligue o disjuntor do circuito. 2. Confira se há fase, neutro e retorno na caixa. 3. Fase em L, neutro em N, cada retorno em L1, L2... 4. Fixe na caixa e religue o disjuntor. 5. Pareie no app do fabricante e vincule à Alexa/Google.'),
   ('MOD_RELE', 2, 'luz', 'Módulo relé (atrás do interruptor)', 'Mantém o interruptor e o espelho do cliente. O módulo fica escondido na caixa.', 'Sim (maioria)', 'Só se for Zigbee', 'Rede elétrica', 'Precisa de espaço na caixa (caixa funda).', '1. Desligue o disjuntor do circuito. 2. Ligue fase e neutro no módulo. 3. Ligue o interruptor existente na entrada S1/S2. 4. Ligue a lâmpada na saída do módulo. 5. Acomode na caixa, religue e pareie.'),
   ('DIMMER', 3, 'luz', 'Dimmer inteligente', 'Controla a intensidade da luz.', 'Verificar', 'Só se for Zigbee', 'Rede elétrica', 'Só para lâmpadas dimerizáveis. Respeitar potência máxima.', '1. Desligue o disjuntor do circuito. 2. Confira se as lâmpadas são dimerizáveis. 3. Ligue conforme o manual. 4. Religue e pareie.'),
@@ -21,16 +23,24 @@ insert into public.tipos_aparelho (id, ordem, item, nome, para_que, neutro, cent
   ('SENSOR_VAZAMENTO', 17, 'sensor', 'Sensor de vazamento de água', 'Avisa vazamento embaixo da pia ou da máquina.', 'Não', 'Verificar', 'Pilha', 'Instalar no chão, no ponto mais baixo.', '1. Pareie no app. 2. Coloque no chão perto da pia ou da máquina. 3. Teste com um pouco de água.'),
   ('SENSOR_GAS', 18, 'sensor', 'Sensor de gás', 'Avisa vazamento de gás de cozinha.', '—', 'Verificar', 'Tomada', 'Gás de botijão (GLP): perto do chão. Gás encanado (natural): perto do teto.', '1. Confira o tipo de gás. 2. Instale na altura certa, perto do fogão, mas não em cima dele. 3. Ligue na tomada e pareie.'),
   ('SENSOR_FUMACA', 19, 'sensor', 'Sensor de fumaça', 'Avisa fumaça.', 'Não', 'Verificar', 'Pilha', 'No teto, longe do fogão para evitar alarme falso.', '1. Pareie no app. 2. Fixe no teto do corredor ou do quarto. 3. Teste pelo botão do sensor.'),
-  ('CENTRAL_ZIGBEE', 20, '(infraestrutura)', 'Central Zigbee (gateway)', 'Necessária quando o projeto usa aparelhos Zigbee.', '—', '—', 'Tomada/USB', 'Perto do roteador. Uma por projeto, da mesma família dos aparelhos.', '1. Ligue perto do roteador. 2. Pareie no app. 3. Adicione os aparelhos Zigbee a partir dela.')
-on conflict (id) do update set ordem = excluded.ordem, item = excluded.item, nome = excluded.nome, para_que = excluded.para_que, neutro = excluded.neutro, central = excluded.central, alimentacao = excluded.alimentacao, cuidados = excluded.cuidados, passos = excluded.passos;
+  ('CENTRAL_ZIGBEE', 20, '(infraestrutura)', 'Central Zigbee (gateway)', 'Necessária quando o projeto usa aparelhos Zigbee.', '—', '—', 'Tomada/USB', 'Perto do roteador. Uma por projeto, da mesma família dos aparelhos.', '1. Ligue perto do roteador. 2. Pareie no app. 3. Adicione os aparelhos Zigbee a partir dela.');
+update public.tipos_aparelho t set stareg = 'I' from novo_tipos_aparelho n where t.codigo = n.codigo and t.stareg = 'A' and (t.ordem, t.item, t.nome, t.para_que, t.neutro, t.central, t.alimentacao, t.cuidados, t.passos) is distinct from (n.ordem, n.item, n.nome, n.para_que, n.neutro, n.central, n.alimentacao, n.cuidados, n.passos);
+insert into public.tipos_aparelho (codigo, ordem, item, nome, para_que, neutro, central, alimentacao, cuidados, passos) select codigo, ordem, item, nome, para_que, neutro, central, alimentacao, cuidados, passos from novo_tipos_aparelho n where not exists (select 1 from public.tipos_aparelho t where t.codigo = n.codigo and t.stareg = 'A');
+update public.tipos_aparelho set stareg = 'I' where stareg = 'A' and codigo not in (select codigo from novo_tipos_aparelho);
 
-insert into public.imoveis (id, ordem, nome, situacao) values
+-- imoveis
+create temp table novo_imoveis on commit drop as select codigo, ordem, nome, situacao from public.imoveis with no data;
+insert into novo_imoveis (codigo, ordem, nome, situacao) values
   ('casa', 1, 'Casa', 'Ativo no MVP'),
   ('apartamento', 2, 'Apartamento', 'Em breve'),
-  ('comercio', 3, 'Comércio', 'Em breve')
-on conflict (id) do update set ordem = excluded.ordem, nome = excluded.nome, situacao = excluded.situacao;
+  ('comercio', 3, 'Comércio', 'Em breve');
+update public.imoveis t set stareg = 'I' from novo_imoveis n where t.codigo = n.codigo and t.stareg = 'A' and (t.ordem, t.nome, t.situacao) is distinct from (n.ordem, n.nome, n.situacao);
+insert into public.imoveis (codigo, ordem, nome, situacao) select codigo, ordem, nome, situacao from novo_imoveis n where not exists (select 1 from public.imoveis t where t.codigo = n.codigo and t.stareg = 'A');
+update public.imoveis set stareg = 'I' where stareg = 'A' and codigo not in (select codigo from novo_imoveis);
 
-insert into public.itens (id, ordem, botao, pergunta, ajuda, tipo_padrao, outros_tipos) values
+-- itens
+create temp table novo_itens on commit drop as select codigo, ordem, botao, pergunta, ajuda, tipo_padrao, outros_tipos from public.itens with no data;
+insert into novo_itens (codigo, ordem, botao, pergunta, ajuda, tipo_padrao, outros_tipos) values
   ('luz', 1, 'Luz', 'Quantas teclas de interruptor?', 'Conte as teclas, não as lâmpadas. 5 lâmpadas na mesma tecla = 1.', 'INT_TOUCH', array['MOD_RELE', 'DIMMER', 'LAMPADA']::text[]),
   ('tomada', 2, 'Tomada', 'Quantas tomadas?', 'Tomadas que o cliente quer ligar e desligar pelo celular.', 'TOMADA_EMBUTIR', array['PLUGUE']::text[]),
   ('cortina', 3, 'Cortina', 'Quantas cortinas?', 'Cada janela com cortina conta 1.', 'CORTINA_MOTOR', array['CORTINA_CONTROLADOR']::text[]),
@@ -39,10 +49,14 @@ insert into public.itens (id, ordem, botao, pergunta, ajuda, tipo_padrao, outros
   ('portao', 6, 'Portão', 'Quantos portões?', 'Depois o app pergunta se o portão já tem motor.', 'PORTAO_MODULO', array['PORTAO_MOTOR']::text[]),
   ('fechadura', 7, 'Fechadura', 'Quantas portas?', 'Fechadura digital: abre por senha, digital ou celular.', 'FECHADURA', array[]::text[]),
   ('camera', 8, 'Câmera', 'Quantas câmeras?', 'Em área externa, o app indica câmera com detecção de pessoas.', 'CAMERA_EXTERNA_IA', array['CAMERA_INTERNA']::text[]),
-  ('sensor', 9, 'Sensor', 'Quantos sensores?', 'O tipo de sensor é sugerido pelo cômodo (presença, porta, gás, vazamento).', null, array['SENSOR_PRESENCA', 'SENSOR_ABERTURA', 'SENSOR_VAZAMENTO', 'SENSOR_GAS', 'SENSOR_FUMACA']::text[])
-on conflict (id) do update set ordem = excluded.ordem, botao = excluded.botao, pergunta = excluded.pergunta, ajuda = excluded.ajuda, tipo_padrao = excluded.tipo_padrao, outros_tipos = excluded.outros_tipos;
+  ('sensor', 9, 'Sensor', 'Quantos sensores?', 'O tipo de sensor é sugerido pelo cômodo (presença, porta, gás, vazamento).', null, array['SENSOR_PRESENCA', 'SENSOR_ABERTURA', 'SENSOR_VAZAMENTO', 'SENSOR_GAS', 'SENSOR_FUMACA']::text[]);
+update public.itens t set stareg = 'I' from novo_itens n where t.codigo = n.codigo and t.stareg = 'A' and (t.ordem, t.botao, t.pergunta, t.ajuda, t.tipo_padrao, t.outros_tipos) is distinct from (n.ordem, n.botao, n.pergunta, n.ajuda, n.tipo_padrao, n.outros_tipos);
+insert into public.itens (codigo, ordem, botao, pergunta, ajuda, tipo_padrao, outros_tipos) select codigo, ordem, botao, pergunta, ajuda, tipo_padrao, outros_tipos from novo_itens n where not exists (select 1 from public.itens t where t.codigo = n.codigo and t.stareg = 'A');
+update public.itens set stareg = 'I' where stareg = 'A' and codigo not in (select codigo from novo_itens);
 
-insert into public.comodos (id, ordem, nome, sensor_sugerido, sugestao_luz, sugestao_tomada, sugestao_cortina, sugestao_ar_condicionado, sugestao_tv, sugestao_portao, sugestao_fechadura, sugestao_camera, sugestao_sensor) values
+-- comodos
+create temp table novo_comodos on commit drop as select codigo, ordem, nome, sensor_sugerido, sugestao_luz, sugestao_tomada, sugestao_cortina, sugestao_ar_condicionado, sugestao_tv, sugestao_portao, sugestao_fechadura, sugestao_camera, sugestao_sensor from public.comodos with no data;
+insert into novo_comodos (codigo, ordem, nome, sensor_sugerido, sugestao_luz, sugestao_tomada, sugestao_cortina, sugestao_ar_condicionado, sugestao_tv, sugestao_portao, sugestao_fechadura, sugestao_camera, sugestao_sensor) values
   ('sala', 1, 'Sala', 'SENSOR_PRESENCA', 2, 2, 1, 1, 1, 0, 0, 0, 1),
   ('quarto', 2, 'Quarto', null, 1, 2, 1, 1, 1, 0, 0, 0, 0),
   ('cozinha', 3, 'Cozinha', 'SENSOR_GAS', 2, 2, 0, 0, 0, 0, 0, 0, 1),
@@ -52,10 +66,14 @@ insert into public.comodos (id, ordem, nome, sensor_sugerido, sugestao_luz, suge
   ('area_externa', 7, 'Área externa', 'SENSOR_PRESENCA', 2, 0, 0, 0, 0, 0, 0, 1, 1),
   ('varanda', 8, 'Varanda', null, 1, 0, 1, 0, 0, 0, 0, 0, 0),
   ('escritorio', 9, 'Escritório', null, 1, 2, 1, 1, 0, 0, 0, 0, 0),
-  ('entrada', 10, 'Entrada', 'SENSOR_ABERTURA', 1, 0, 0, 0, 0, 0, 1, 1, 1)
-on conflict (id) do update set ordem = excluded.ordem, nome = excluded.nome, sensor_sugerido = excluded.sensor_sugerido, sugestao_luz = excluded.sugestao_luz, sugestao_tomada = excluded.sugestao_tomada, sugestao_cortina = excluded.sugestao_cortina, sugestao_ar_condicionado = excluded.sugestao_ar_condicionado, sugestao_tv = excluded.sugestao_tv, sugestao_portao = excluded.sugestao_portao, sugestao_fechadura = excluded.sugestao_fechadura, sugestao_camera = excluded.sugestao_camera, sugestao_sensor = excluded.sugestao_sensor;
+  ('entrada', 10, 'Entrada', 'SENSOR_ABERTURA', 1, 0, 0, 0, 0, 0, 1, 1, 1);
+update public.comodos t set stareg = 'I' from novo_comodos n where t.codigo = n.codigo and t.stareg = 'A' and (t.ordem, t.nome, t.sensor_sugerido, t.sugestao_luz, t.sugestao_tomada, t.sugestao_cortina, t.sugestao_ar_condicionado, t.sugestao_tv, t.sugestao_portao, t.sugestao_fechadura, t.sugestao_camera, t.sugestao_sensor) is distinct from (n.ordem, n.nome, n.sensor_sugerido, n.sugestao_luz, n.sugestao_tomada, n.sugestao_cortina, n.sugestao_ar_condicionado, n.sugestao_tv, n.sugestao_portao, n.sugestao_fechadura, n.sugestao_camera, n.sugestao_sensor);
+insert into public.comodos (codigo, ordem, nome, sensor_sugerido, sugestao_luz, sugestao_tomada, sugestao_cortina, sugestao_ar_condicionado, sugestao_tv, sugestao_portao, sugestao_fechadura, sugestao_camera, sugestao_sensor) select codigo, ordem, nome, sensor_sugerido, sugestao_luz, sugestao_tomada, sugestao_cortina, sugestao_ar_condicionado, sugestao_tv, sugestao_portao, sugestao_fechadura, sugestao_camera, sugestao_sensor from novo_comodos n where not exists (select 1 from public.comodos t where t.codigo = n.codigo and t.stareg = 'A');
+update public.comodos set stareg = 'I' where stareg = 'A' and codigo not in (select codigo from novo_comodos);
 
-insert into public.servicos (id, nome, unidade, valor_referencia) values
+-- servicos
+create temp table novo_servicos on commit drop as select codigo, nome, unidade, valor_referencia from public.servicos with no data;
+insert into novo_servicos (codigo, nome, unidade, valor_referencia) values
   ('S01', 'Instalar interruptor inteligente', 'por interruptor', null),
   ('S02', 'Instalar módulo relé', 'por módulo', null),
   ('S03', 'Instalar tomada inteligente', 'por tomada', null),
@@ -74,10 +92,14 @@ insert into public.servicos (id, nome, unidade, valor_referencia) values
   ('S16', 'Instalar dispositivo DR', 'por unidade', null),
   ('S17', 'Troca/ampliação do quadro', 'por quadro', null),
   ('S18', 'Instalar repetidor ou roteador mesh', 'por unidade', null),
-  ('S19', 'Visita técnica', 'por visita', null)
-on conflict (id) do update set nome = excluded.nome, unidade = excluded.unidade, valor_referencia = excluded.valor_referencia;
+  ('S19', 'Visita técnica', 'por visita', null);
+update public.servicos t set stareg = 'I' from novo_servicos n where t.codigo = n.codigo and t.stareg = 'A' and (t.nome, t.unidade, t.valor_referencia) is distinct from (n.nome, n.unidade, n.valor_referencia);
+insert into public.servicos (codigo, nome, unidade, valor_referencia) select codigo, nome, unidade, valor_referencia from novo_servicos n where not exists (select 1 from public.servicos t where t.codigo = n.codigo and t.stareg = 'A');
+update public.servicos set stareg = 'I' where stareg = 'A' and codigo not in (select codigo from novo_servicos);
 
-insert into public.regras_eletricas (id, quando, acao, mensagem, servico, servico_id, base) values
+-- regras_eletricas
+create temp table novo_regras_eletricas on commit drop as select codigo, quando, acao, mensagem, servico, servico_codigo, base from public.regras_eletricas with no data;
+insert into novo_regras_eletricas (codigo, quando, acao, mensagem, servico, servico_codigo, base) values
   ('R01', 'Tensão da casa escolhida (127 V ou 220 V)', 'Mostra só aparelhos que aceitam essa tensão (bivolt passa sempre).', 'Mostrando aparelhos para 220 V.', '—', null, 'Manual do fabricante'),
   ('R02', 'Tem Luz e a casa NÃO tem neutro na caixa', 'Prefere modelos sem neutro; se não houver, adiciona o serviço.', 'Estes interruptores precisam de neutro. A casa não tem neutro na caixa.', 'Passar neutro até a caixa (por ponto)', 'S14', 'Manual do fabricante'),
   ('R03', 'Tem Luz e neutro = Não sei', 'Mostra alerta antes da lista.', 'Confira o neutro na caixa antes de comprar.', '—', null, '—'),
@@ -94,10 +116,14 @@ insert into public.regras_eletricas (id, quando, acao, mensagem, servico, servic
   ('R14', 'Ar e TV no mesmo cômodo', 'Usa 1 controle infravermelho para os dois.', '—', '—', null, 'Economia para o cliente'),
   ('R15', 'Mais de 4 teclas de Luz no mesmo cômodo', 'Divide em mais de um interruptor.', 'Interruptores têm até 4 teclas. Ajuste se ficam em caixas diferentes.', '—', null, '—'),
   ('R16', 'Câmera em área externa', 'Recomenda câmera com detecção de pessoas e IP66/IP67.', 'Coloque a placa "ambiente monitorado" e não filme a área do vizinho (LGPD).', '—', null, 'LGPD'),
-  ('R17', 'Interruptor paralelo (three-way)', 'Não é perguntado no MVP.', 'Confira na obra se há paralelo: exige modelo compatível.', '—', null, '—')
-on conflict (id) do update set quando = excluded.quando, acao = excluded.acao, mensagem = excluded.mensagem, servico = excluded.servico, servico_id = excluded.servico_id, base = excluded.base;
+  ('R17', 'Interruptor paralelo (three-way)', 'Não é perguntado no MVP.', 'Confira na obra se há paralelo: exige modelo compatível.', '—', null, '—');
+update public.regras_eletricas t set stareg = 'I' from novo_regras_eletricas n where t.codigo = n.codigo and t.stareg = 'A' and (t.quando, t.acao, t.mensagem, t.servico, t.servico_codigo, t.base) is distinct from (n.quando, n.acao, n.mensagem, n.servico, n.servico_codigo, n.base);
+insert into public.regras_eletricas (codigo, quando, acao, mensagem, servico, servico_codigo, base) select codigo, quando, acao, mensagem, servico, servico_codigo, base from novo_regras_eletricas n where not exists (select 1 from public.regras_eletricas t where t.codigo = n.codigo and t.stareg = 'A');
+update public.regras_eletricas set stareg = 'I' where stareg = 'A' and codigo not in (select codigo from novo_regras_eletricas);
 
-insert into public.produtos (id, item, tipo, marca, modelo, nome, app, alexa, google, protocolo, neutro, tensao, corrente_max, potencia_max, teclas, alimentacao, anatel, inmetro, fabricado_brasil, garantia_meses, preco, link, fonte, foto_url, foto_fonte, status, verificado_em, observacoes) values
+-- produtos
+create temp table novo_produtos on commit drop as select codigo, item, tipo, marca, modelo, nome, app, alexa, google, protocolo, neutro, tensao, corrente_max, potencia_max, teclas, alimentacao, anatel, inmetro, fabricado_brasil, garantia_meses, preco, link, fonte, foto_url, foto_fonte, status, verificado_em, observacoes from public.produtos with no data;
+insert into novo_produtos (codigo, item, tipo, marca, modelo, nome, app, alexa, google, protocolo, neutro, tensao, corrente_max, potencia_max, teclas, alimentacao, anatel, inmetro, fabricado_brasil, garantia_meses, preco, link, fonte, foto_url, foto_fonte, status, verificado_em, observacoes) values
   ('P001', 'luz', 'INT_TOUCH', 'Intelbras', 'EWS 1001', 'Interruptor Smart Wi-Fi Touch 1 tecla', 'Mibo Smart', 'Verificar', 'Verificar', 'Wi-Fi 2,4 GHz', 'Sim (fabricante)', '100–240 V~ bivolt (fabricante)', '10', '1270 (127 V) / 2200 (220 V)', '1', 'Rede elétrica', 'Verificar', 'Verificar', 'Não', 12, 135.9, 'https://loja.intelbras.com.br/interruptor-smart-touch-ews-1001-branco/p', 'https://backend.intelbras.com/sites/default/files/2026-01/Manual_EWS_1001_01-26_site.pdf', null, null, 'A verificar', null, 'Caixa 4x2. Origem China (importado pela Intelbras). Nº Anatel não publicado no manual: conferir na etiqueta. A Intelbras lançou a linha nova EIW (P025–P028).'),
   ('P002', 'luz', 'INT_TOUCH', 'Intelbras', 'EWS 1002', 'Interruptor Smart Touch 2 teclas', 'Izy Smart / Mibo Smart', 'Verificar', 'Verificar', 'Verificar', 'Verificar', 'Verificar', 'Verificar', 'Verificar', '2', 'Rede elétrica', 'Verificar', 'Verificar', 'Verificar', null, null, null, 'https://loja.intelbras.com.br/interruptor-smart-touch-ews-1002-preto/p', null, null, 'A verificar', null, 'O manual 01/26 ainda cita o app Izy Smart; a Intelbras está migrando para o Mibo Smart. Nº Anatel não publicado.'),
   ('P003', 'luz', 'INT_TOUCH', 'Intelbras', 'EWS 1003', 'Interruptor Smart Touch 3 teclas', 'Izy Smart', 'Verificar', 'Verificar', 'Wi-Fi 2,4 GHz', 'Sim (fabricante)', '100–240 V~ (fabricante)', '10', '1200', '3', 'Rede elétrica', 'Verificar', 'Verificar', 'Verificar', null, null, null, 'https://backend.intelbras.com/sites/default/files/2026-01/Manual_completo_EWS_1003_01-26_site.pdf | https://backend.intelbras.com/sites/default/files/2022-02/Manual_completo_EWS_1003_01-22_site%20%281%29.pdf', null, null, 'A verificar', null, 'Corrente e potência do manual de 2022. Caixa 4x2, fio até 1,5 mm². Neutro deve ser o mesmo das lâmpadas. Cor preta indisponível na loja oficial em 23/11/2026.'),
@@ -134,19 +160,11 @@ insert into public.produtos (id, item, tipo, marca, modelo, nome, app, alexa, go
   ('P034', 'portao', 'PORTAO_MODULO', 'Intelbras', 'IGD 110', 'Acionador de portão inteligente Wi-Fi', 'Mibo Smart', 'Sim (anúncio)', 'Sim (anúncio)', 'Wi-Fi 2,4 GHz', '—', '100–240 V~ bivolt (fabricante)', null, null, null, 'Rede elétrica', '17791-20-11765 (módulo incorporado)', '—', 'Verificar', 12, null, null, 'https://backend.intelbras.com/sites/default/files/2023-07/Manual%20IGD%20110%20%20App%20MIbo%2001-23%20_0.pdf', null, null, 'Verificado', '2026-11-23', 'Coloca Wi-Fi em motor de portão que já existe (qualquer marca, segundo anúncio). Vai dentro do motor ou em caixa 4x2 com tampa cega. Tem sensor de portão aberto.'),
   ('P035', '(infraestrutura)', 'CENTRAL_ZIGBEE', 'Intelbras', 'MCA 1002', 'Hub de automação Zigbee', 'Mibo Smart', 'Verificar', 'Verificar', 'Zigbee + Wi-Fi', '—', 'Verificar', null, null, null, 'Fonte', 'Verificar', '—', 'Verificar', null, null, null, 'https://www.kabum.com.br/produto/653334/central-de-automacao-residencial-mca-1002', null, null, 'A verificar', null, 'Até 32 aparelhos Zigbee (anúncio).'),
   ('P036', '(infraestrutura)', 'CENTRAL_ZIGBEE', 'NovaDigital', 'HNZ-CB', 'Hub Zigbee 3.0 cabeado (RJ45)', 'Smart Life (Tuya)', 'Sim (anúncio)', 'Sim (anúncio)', 'Zigbee 3.0 + rede cabeada', '—', '—', null, null, null, 'Fonte (USB-C)', '13750-22-11765 (anúncio de loja, conferir)', '—', 'Verificar', 3, null, null, 'https://www.kabum.com.br/produto/637046/hub-zigbee-cabeado-novadigital-conexao-rj45-wi-fi-smart-life-tuya', null, null, 'A verificar', null, 'Até 128 aparelhos. Garantia de só 3 meses (anúncio): avaliar. Combina com o interruptor Zigbee P009.'),
-  ('P037', 'cortina', 'CORTINA_MOTOR', 'Ekaza', 'Verificar', 'Cortina motorizada Wi-Fi até 4,2 m', 'Verificar', 'Sim (anúncio)', 'Verificar', 'Wi-Fi 2,4 GHz', 'Verificar', 'Verificar', null, null, null, 'Rede elétrica', 'Verificar', '—', 'Verificar', null, null, null, 'https://www.magazineluiza.com.br/busca/cortinas+inteligentes', null, null, 'A verificar', null, 'Único motor de cortina com marca de garantia no Brasil encontrado até agora; confirmar modelo, Anatel e garantia.')
-on conflict (id) do update set item = excluded.item, tipo = excluded.tipo, marca = excluded.marca, modelo = excluded.modelo, nome = excluded.nome, app = excluded.app, alexa = excluded.alexa, google = excluded.google, protocolo = excluded.protocolo, neutro = excluded.neutro, tensao = excluded.tensao, corrente_max = excluded.corrente_max, potencia_max = excluded.potencia_max, teclas = excluded.teclas, alimentacao = excluded.alimentacao, anatel = excluded.anatel, inmetro = excluded.inmetro, fabricado_brasil = excluded.fabricado_brasil, garantia_meses = excluded.garantia_meses, preco = excluded.preco, link = excluded.link, fonte = excluded.fonte, foto_url = excluded.foto_url, foto_fonte = excluded.foto_fonte, status = excluded.status, verificado_em = excluded.verificado_em, observacoes = excluded.observacoes;
+  ('P037', 'cortina', 'CORTINA_MOTOR', 'Ekaza', 'Verificar', 'Cortina motorizada Wi-Fi até 4,2 m', 'Verificar', 'Sim (anúncio)', 'Verificar', 'Wi-Fi 2,4 GHz', 'Verificar', 'Verificar', null, null, null, 'Rede elétrica', 'Verificar', '—', 'Verificar', null, null, null, 'https://www.magazineluiza.com.br/busca/cortinas+inteligentes', null, null, 'A verificar', null, 'Único motor de cortina com marca de garantia no Brasil encontrado até agora; confirmar modelo, Anatel e garantia.');
+update public.produtos t set stareg = 'I' from novo_produtos n where t.codigo = n.codigo and t.stareg = 'A' and (t.item, t.tipo, t.marca, t.modelo, t.nome, t.app, t.alexa, t.google, t.protocolo, t.neutro, t.tensao, t.corrente_max, t.potencia_max, t.teclas, t.alimentacao, t.anatel, t.inmetro, t.fabricado_brasil, t.garantia_meses, t.preco, t.link, t.fonte, t.foto_url, t.foto_fonte, t.status, t.verificado_em, t.observacoes) is distinct from (n.item, n.tipo, n.marca, n.modelo, n.nome, n.app, n.alexa, n.google, n.protocolo, n.neutro, n.tensao, n.corrente_max, n.potencia_max, n.teclas, n.alimentacao, n.anatel, n.inmetro, n.fabricado_brasil, n.garantia_meses, n.preco, n.link, n.fonte, n.foto_url, n.foto_fonte, n.status, n.verificado_em, n.observacoes);
+insert into public.produtos (codigo, item, tipo, marca, modelo, nome, app, alexa, google, protocolo, neutro, tensao, corrente_max, potencia_max, teclas, alimentacao, anatel, inmetro, fabricado_brasil, garantia_meses, preco, link, fonte, foto_url, foto_fonte, status, verificado_em, observacoes) select codigo, item, tipo, marca, modelo, nome, app, alexa, google, protocolo, neutro, tensao, corrente_max, potencia_max, teclas, alimentacao, anatel, inmetro, fabricado_brasil, garantia_meses, preco, link, fonte, foto_url, foto_fonte, status, verificado_em, observacoes from novo_produtos n where not exists (select 1 from public.produtos t where t.codigo = n.codigo and t.stareg = 'A');
+update public.produtos set stareg = 'I' where stareg = 'A' and codigo not in (select codigo from novo_produtos);
 
-insert into public.catalogo_info (id, gerado_em) values
-  (1, '2026-11-26T12:07:38.239Z')
-on conflict (id) do update set gerado_em = excluded.gerado_em;
-
-update public.produtos set status = 'Inativo' where id not in ('P001', 'P002', 'P003', 'P004', 'P005', 'P006', 'P007', 'P008', 'P009', 'P010', 'P011', 'P012', 'P013', 'P014', 'P015', 'P016', 'P017', 'P018', 'P019', 'P020', 'P021', 'P022', 'P023', 'P024', 'P025', 'P026', 'P027', 'P028', 'P029', 'P030', 'P031', 'P032', 'P033', 'P034', 'P035', 'P036', 'P037') and status <> 'Inativo';
-delete from public.regras_eletricas where id not in ('R01', 'R02', 'R03', 'R04', 'R05', 'R06', 'R07', 'R08', 'R09', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'R16', 'R17');
-delete from public.itens where id not in ('luz', 'tomada', 'cortina', 'ar_condicionado', 'tv', 'portao', 'fechadura', 'camera', 'sensor');
-delete from public.comodos where id not in ('sala', 'quarto', 'cozinha', 'banheiro', 'area_servico', 'garagem', 'area_externa', 'varanda', 'escritorio', 'entrada');
-delete from public.imoveis where id not in ('casa', 'apartamento', 'comercio');
-delete from public.tipos_aparelho where id not in ('INT_TOUCH', 'MOD_RELE', 'DIMMER', 'LAMPADA', 'TOMADA_EMBUTIR', 'PLUGUE', 'CORTINA_MOTOR', 'CORTINA_CONTROLADOR', 'IR_UNIVERSAL', 'PORTAO_MODULO', 'PORTAO_MOTOR', 'FECHADURA', 'CAMERA_INTERNA', 'CAMERA_EXTERNA_IA', 'SENSOR_PRESENCA', 'SENSOR_ABERTURA', 'SENSOR_VAZAMENTO', 'SENSOR_GAS', 'SENSOR_FUMACA', 'CENTRAL_ZIGBEE');
-delete from public.servicos where id not in ('S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07', 'S08', 'S09', 'S10', 'S11', 'S12', 'S13', 'S14', 'S15', 'S16', 'S17', 'S18', 'S19');
+insert into public.catalogo_info (id, gerado_em) values (1, '2026-11-26T14:53:54.065Z') on conflict (id) do update set gerado_em = excluded.gerado_em;
 
 commit;

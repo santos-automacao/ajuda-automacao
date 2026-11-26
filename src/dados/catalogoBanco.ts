@@ -20,14 +20,21 @@ export const TABELAS_CATALOGO: (keyof LinhasBanco)[] = [
   'catalogo_info', 'imoveis', 'comodos', 'itens', 'tipos_aparelho', 'produtos', 'regras_eletricas', 'servicos',
 ];
 
+type Resposta = PromiseLike<{ data: unknown[] | null; error: unknown }>;
+
 /** O mínimo do cliente do Supabase que usamos (assim este arquivo não depende da biblioteca). */
 export interface ClienteLeitura {
-  from(tabela: string): { select(colunas: string): PromiseLike<{ data: unknown[] | null; error: unknown }> };
+  from(tabela: string): { select(colunas: string): Resposta & { eq(coluna: string, valor: string): Resposta } };
 }
 
-/** Lê todas as tabelas do catálogo ao mesmo tempo. Se alguma falhar, lança erro. */
+/**
+ * Lê todas as tabelas do catálogo ao mesmo tempo. Se alguma falhar, lança erro.
+ * Das 7 tabelas do catálogo vêm só os registros atuais (stareg 'A'); os antigos ficam no banco
+ * para os orçamentos (decisão do dono, 26/11/2026).
+ */
 export async function buscarLinhas(cliente: ClienteLeitura): Promise<LinhasBanco> {
-  const respostas = await Promise.all(TABELAS_CATALOGO.map((t) => cliente.from(t).select('*')));
+  const respostas = await Promise.all(TABELAS_CATALOGO.map((t) =>
+    t === 'catalogo_info' ? cliente.from(t).select('*') : cliente.from(t).select('*').eq('stareg', 'A')));
   const linhas = {} as LinhasBanco;
   respostas.forEach(({ data, error }, i) => {
     if (error || !data) throw new Error(`Falha ao ler ${TABELAS_CATALOGO[i]}: ${JSON.stringify(error)}`);
@@ -47,7 +54,22 @@ function numeroOuTexto(x: unknown): number | string | null {
 const porOrdem = (a: Linha, b: Linha) => a.ordem - b.ordem;
 const porId = (a: Linha, b: Linha) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
-export function montarCatalogo(l: LinhasBanco): Catalogo {
+/** No banco, "codigo" é o código da planilha (P001) e "id" é o número do registro. No app, o id é o código. */
+function comCodigo(lista: Linha[]): Linha[] {
+  return lista.map(({ codigo, ...resto }) => ({ ...resto, id: codigo }));
+}
+
+export function montarCatalogo(banco: LinhasBanco): Catalogo {
+  const l = {
+    ...banco,
+    imoveis: comCodigo(banco.imoveis),
+    comodos: comCodigo(banco.comodos),
+    itens: comCodigo(banco.itens),
+    tipos_aparelho: comCodigo(banco.tipos_aparelho),
+    produtos: comCodigo(banco.produtos),
+    regras_eletricas: comCodigo(banco.regras_eletricas),
+    servicos: comCodigo(banco.servicos),
+  };
   return {
     geradoEm: new Date(l.catalogo_info[0]?.gerado_em).toISOString(),
     imoveis: [...l.imoveis].sort(porOrdem).map((i): Imovel => ({ id: i.id, nome: i.nome, situacao: i.situacao })),

@@ -5,7 +5,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { CATALOGO_DO_APP, usarCatalogo, type Catalogo } from './catalogo';
-import { buscarLinhas, catalogoValido, maisNovo, montarCatalogo } from './catalogoBanco';
+import { buscarLinhas, catalogoValido, maisNovo, montarCatalogo, type ClienteLeitura } from './catalogoBanco';
 import { supabase } from './supabase';
 
 export const CHAVE_CATALOGO = 'ajuda-automacao:catalogo';
@@ -29,7 +29,8 @@ export async function carregarCatalogoGuardado(): Promise<void> {
 export async function baixarCatalogo(): Promise<void> {
   if (!supabase) return;
   try {
-    const novo = montarCatalogo(await buscarLinhas(supabase));
+    // O tipo do cliente do Supabase é fundo demais para o TypeScript comparar; o formato é o mesmo.
+    const novo = montarCatalogo(await buscarLinhas(supabase as unknown as ClienteLeitura));
     if (!catalogoValido(novo)) return;
     const atual = maisNovo(CATALOGO_DO_APP, await lerGuardado());
     if (Date.parse(novo.geradoEm) <= Date.parse(atual.geradoEm)) return; // nada de novo
