@@ -1,13 +1,14 @@
 // Gera o SQL que carrega (ou atualiza) o catálogo no Supabase.
 // Uso: npm run dados  →  node scripts/gerar-sql-catalogo.mjs
 // Lê:   src/dados/catalogo.json (gerado da planilha)
-// Gera: supabase/seed/catalogo.sql — pode rodar quantas vezes quiser ("upsert": insere ou atualiza).
+// Gera: supabase/seed/catalogo.sql — pode rodar quantas vezes quiser; nada é apagado nem sobrescrito.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const cat = JSON.parse(fs.readFileSync(path.join(raiz, 'src', 'dados', 'catalogo.json'), 'utf8'));
+// Entrada opcional (argv[3]): outro catalogo.json, usado para testar mudanças sem mexer na planilha.
+const cat = JSON.parse(fs.readFileSync(process.argv[3] ?? path.join(raiz, 'src', 'dados', 'catalogo.json'), 'utf8'));
 
 /** Valor em SQL: texto entre aspas simples, número cru, nulo como null. */
 function v(x, tipo = 'texto') {
@@ -18,12 +19,26 @@ function v(x, tipo = 'texto') {
   return `'${String(x).replace(/'/g, "''")}'`;
 }
 
-/** insert ... on conflict (id) do update — atualiza o que mudou na planilha. */
-function upsert(tabela, colunas, linhas) {
-  if (!linhas.length) return '';
+/**
+ * Carrega uma aba numa tabela, guardando histórico. colunas[0] é sempre "codigo".
+ * 1) põe as linhas da planilha numa tabela temporária (mesmos tipos da tabela de verdade);
+ * 2) inativa o registro atual cujo conteúdo mudou; 3) grava quem ficou sem registro atual (novo ou mudou);
+ * 4) inativa o que saiu da planilha.
+ */
+function carregar(tabela, colunas, linhas) {
+  if (!linhas.length) throw new Error(`Aba vazia: ${tabela}. Isso inativaria tudo; confira a planilha.`);
+  const n = `novo_${tabela}`;
+  const cols = colunas.join(', ');
+  const dados = colunas.filter((c) => c !== 'codigo');
   const valores = linhas.map((l) => `  (${l.join(', ')})`).join(',\n');
-  const atualiza = colunas.filter((c) => c !== 'id').map((c) => `${c} = excluded.${c}`).join(', ');
-  return `insert into public.${tabela} (${colunas.join(', ')}) values\n${valores}\non conflict (id) do update set ${atualiza};\n\n`;
+  return `-- ${tabela}\n` +
+    `create temp table ${n} on commit drop as select ${cols} from public.${tabela} with no data;\n` +
+    `insert into ${n} (${cols}) values\n${valores};\n` +
+    `update public.${tabela} t set stareg = 'I' from ${n} n where t.codigo = n.codigo and t.stareg = 'A' and ` +
+    `(${dados.map((c) => `t.${c}`).join(', ')}) is distinct from (${dados.map((c) => `n.${c}`).join(', ')});\n` +
+    `insert into public.${tabela} (${cols}) select ${cols} from ${n} n ` +
+    `where not exists (select 1 from public.${tabela} t where t.codigo = n.codigo and t.stareg = 'A');\n` +
+    `update public.${tabela} set stareg = 'I' where stareg = 'A' and codigo not in (select codigo from ${n});\n\n`;
 }
 
 const tiposValidos = new Set(cat.tipos.map((t) => t.id));
@@ -45,34 +60,41 @@ const ITENS = ['luz', 'tomada', 'cortina', 'ar_condicionado', 'tv', 'portao', 'f
 
 let sql = `-- Gerado por scripts/gerar-sql-catalogo.mjs em ${new Date().toISOString()} — não edite à mão.\nbegin;\n\n`;
 
-sql += upsert('tipos_aparelho', ['id', 'item', 'nome', 'para_que', 'neutro', 'central', 'alimentacao', 'cuidados', 'passos'],
-  cat.tipos.map((t) => [v(t.id), v(t.item), v(t.nome), v(t.paraQue), v(t.neutro), v(t.central), v(t.alimentacao), v(t.cuidados), v(t.passos)]));
+// "ordem" = posição na aba (o app mostra nessa ordem).
+sql += carregar('tipos_aparelho', ['codigo', 'ordem', 'item', 'nome', 'para_que', 'neutro', 'central', 'alimentacao', 'cuidados', 'passos'],
+  cat.tipos.map((t, n) => [v(t.id), v(n + 1, 'int'), v(t.item), v(t.nome), v(t.paraQue), v(t.neutro), v(t.central), v(t.alimentacao), v(t.cuidados), v(t.passos)]));
 
-sql += upsert('imoveis', ['id', 'nome', 'situacao'], cat.imoveis.map((i) => [v(i.id), v(i.nome), v(i.situacao)]));
+sql += carregar('imoveis', ['codigo', 'ordem', 'nome', 'situacao'],
+  cat.imoveis.map((i, n) => [v(i.id), v(n + 1, 'int'), v(i.nome), v(i.situacao)]));
 
-sql += upsert('itens', ['id', 'ordem', 'botao', 'pergunta', 'ajuda', 'tipo_padrao', 'outros_tipos'],
+sql += carregar('itens', ['codigo', 'ordem', 'botao', 'pergunta', 'ajuda', 'tipo_padrao', 'outros_tipos'],
   cat.itens.map((i) => [v(i.id), v(i.ordem, 'int'), v(i.botao), v(i.pergunta), v(i.ajuda), v(tipo(i.tipoPadrao)), v(i.outrosTipos ?? [], 'array')]));
 
-sql += upsert('comodos', ['id', 'ordem', 'nome', 'sensor_sugerido', ...ITENS.map((i) => `sugestao_${i}`)],
+sql += carregar('comodos', ['codigo', 'ordem', 'nome', 'sensor_sugerido', ...ITENS.map((i) => `sugestao_${i}`)],
   cat.comodos.map((c) => [v(c.id), v(c.ordem, 'int'), v(c.nome), v(tipo(c.sensorSugerido)), ...ITENS.map((i) => v(c.sugestao?.[i] ?? 0, 'int'))]));
 
-sql += upsert('servicos', ['id', 'nome', 'unidade', 'valor_referencia'],
+sql += carregar('servicos', ['codigo', 'nome', 'unidade', 'valor_referencia'],
   cat.servicos.map((s) => [v(s.id), v(s.servico), v(s.unidade), v(s.valor, 'num')]));
 
-sql += upsert('regras_eletricas', ['id', 'quando', 'acao', 'mensagem', 'servico', 'servico_id', 'base'],
+sql += carregar('regras_eletricas', ['codigo', 'quando', 'acao', 'mensagem', 'servico', 'servico_codigo', 'base'],
   cat.regras.map((r) => [v(r.id), v(r.quando), v(r.acao), v(r.mensagem), v(r.servico), v(servicoDaRegra(r.servico)), v(r.base)]));
 
-sql += upsert('produtos',
-  ['id', 'item', 'tipo', 'marca', 'modelo', 'nome', 'app', 'alexa', 'google', 'protocolo', 'neutro', 'tensao', 'corrente_max',
+sql += carregar('produtos',
+  ['codigo', 'item', 'tipo', 'marca', 'modelo', 'nome', 'app', 'alexa', 'google', 'protocolo', 'neutro', 'tensao', 'corrente_max',
     'potencia_max', 'teclas', 'alimentacao', 'anatel', 'inmetro', 'fabricado_brasil', 'garantia_meses', 'preco', 'link', 'fonte',
     'foto_url', 'foto_fonte', 'status', 'verificado_em', 'observacoes'],
   cat.produtos.map((p) => [v(p.id), v(p.item), v(p.tipo), v(p.marca), v(p.modelo), v(p.nome), v(p.app), v(p.alexa), v(p.google),
-    v(p.protocolo), v(p.neutro), v(p.tensao), v(p.correnteMax), v(p.potenciaMax), v(p.teclas, 'int'), v(p.alimentacao), v(p.anatel),
+    v(p.protocolo), v(p.neutro), v(p.tensao), v(p.correnteMax), v(p.potenciaMax), v(p.teclas), v(p.alimentacao), v(p.anatel),
     v(p.inmetro), v(p.fabricadoBrasil), v(p.garantiaMeses, 'int'), v(p.preco, 'num'), v(p.link), v(p.fonte), v(p.fotoUrl),
     v(p.fotoFonte), v(p.status), v(/^\d{4}-\d{2}-\d{2}$/.test(p.verificadoEm ?? '') ? p.verificadoEm : null), v(p.observacoes)]));
 
+// Data do catálogo (uma linha só, sem histórico): o app compara para saber qual cópia é a mais nova.
+sql += `insert into public.catalogo_info (id, gerado_em) values (1, ${v(cat.geradoEm)}) on conflict (id) do update set gerado_em = excluded.gerado_em;\n\n`;
+
 sql += 'commit;\n';
-fs.mkdirSync(path.join(raiz, 'supabase', 'seed'), { recursive: true });
-fs.writeFileSync(path.join(raiz, 'supabase', 'seed', 'catalogo.sql'), sql);
+// Destino opcional (os testes gravam num arquivo temporário).
+const destino = process.argv[2] ?? path.join(raiz, 'supabase', 'seed', 'catalogo.sql');
+fs.mkdirSync(path.dirname(destino), { recursive: true });
+fs.writeFileSync(destino, sql);
 console.log(`supabase/seed/catalogo.sql: ${cat.tipos.length} tipos, ${cat.itens.length} itens, ${cat.comodos.length} cômodos, ` +
   `${cat.servicos.length} serviços, ${cat.regras.length} regras, ${cat.produtos.length} produtos.`);

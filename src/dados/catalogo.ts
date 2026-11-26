@@ -98,7 +98,7 @@ export interface ServicoCatalogo {
   valor: number | null;
 }
 
-interface Catalogo {
+export interface Catalogo {
   geradoEm: string;
   imoveis: Imovel[];
   comodos: ComodoTipo[];
@@ -109,9 +109,20 @@ interface Catalogo {
   servicos: ServicoCatalogo[];
 }
 
-export const catalogo = dados as unknown as Catalogo;
+/** O catálogo que vai dentro do app (reserva para quando não há internet). Nunca muda. */
+export const CATALOGO_DO_APP = dados as unknown as Catalogo;
+
+/** O catálogo em uso. Começa igual ao do app; ao abrir, pode virar a cópia baixada do banco
+ *  (ver sincronizarCatalogo.ts). As telas importam este objeto, então ele é trocado no lugar. */
+export const catalogo: Catalogo = { ...CATALOGO_DO_APP };
 
 export const ITENS: ItemId[] = catalogo.itens.map((i) => i.id);
+
+/** Passa a usar outro catálogo. Chamar só antes de mostrar as telas (ao abrir o app). */
+export function usarCatalogo(novo: Catalogo) {
+  Object.assign(catalogo, novo);
+  ITENS.splice(0, ITENS.length, ...novo.itens.map((i) => i.id));
+}
 
 export const comodoTipo = (id: string) => catalogo.comodos.find((c) => c.id === id);
 export const itemPorId = (id: ItemId) => catalogo.itens.find((i) => i.id === id);

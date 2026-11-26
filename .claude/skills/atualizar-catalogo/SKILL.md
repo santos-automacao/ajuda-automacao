@@ -126,7 +126,13 @@ Responda, por exemplo: "aprovo P001, P004 e os novos N1 e N3; reprova P008".
    Status aprovado → `Verificado`, `Verificado em` → data de hoje. Produtos novos ganham o próximo ID livre.
 3. Rode `npm run dados` (gera também `supabase/seed/catalogo.sql`), depois `npm run tipos` e `npm run lint`.
    Com o conector do Supabase, rode o `catalogo.sql` no projeto `ajuda-automacao-sp` para o banco ficar igual à planilha.
-4. Grave também cada mudança na tabela `verificacoes` do Supabase (produto, campo, valor antigo, valor novo, fonte,
+   Depois rode `npm run comparar-catalogo`: tem que dizer "Catálogo do banco igual ao catalogo.json".
+   (O app baixa o catálogo do banco; se o banco ficar diferente da planilha, o eletricista vê o do banco.)
+   Produto que saiu de linha: marque `Inativo` na coluna Status da planilha (prefira a apagar a linha).
+   O banco guarda histórico (decisão do dono, 26/11/2026): nada é apagado. Linha que mudou → o registro antigo vira
+   `stareg = 'I'` e entra um novo com o mesmo `codigo`; linha que sumiu da planilha → `stareg = 'I'`.
+   O código (P001, S01...) nunca muda nem é reaproveitado para outro produto.
+4. Grave também cada mudança na tabela `verificacoes` do Supabase (`produto_codigo`, campo, valor antigo, valor novo, fonte,
    relatório), quando o banco estiver conectado.
 5. Registre em `docs/decisoes.md` (com data) o que entrou, o que saiu e por quê.
 6. Faça um commit em português numa branch `catalogo/AAAA-MM` e abra um pull request. Não envie direto
