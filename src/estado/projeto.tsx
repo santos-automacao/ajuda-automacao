@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useReducer, type Dispatch, type ReactNode } from 'react';
 
 import { catalogo, comodoTipo, type ItemId } from '@/dados/catalogo';
+import { baixarCatalogo, carregarCatalogoGuardado } from '@/dados/sincronizarCatalogo';
 
 /** Sugestões de itens por cômodo (aba Cômodos): decidido deixar para depois (18/11/2026). */
 export const USAR_SUGESTOES = false;
@@ -197,7 +198,10 @@ export function ProvedorProjeto({ children }: { children: ReactNode }) {
   const [estado, dispatch] = useReducer(redutor, { carregado: false, projeto: null, perfil: PERFIL_VAZIO });
 
   useEffect(() => {
-    AsyncStorage.getItem(CHAVE_ARMAZENAMENTO)
+    // Primeiro o catálogo guardado (só leitura no aparelho, sem esperar internet);
+    // depois de abrir, baixa o do banco em segundo plano para a próxima vez.
+    carregarCatalogoGuardado()
+      .then(() => AsyncStorage.getItem(CHAVE_ARMAZENAMENTO))
       .then((texto) => {
         let dados = {};
         try {
@@ -207,7 +211,8 @@ export function ProvedorProjeto({ children }: { children: ReactNode }) {
         }
         dispatch({ tipo: 'carregar', dados });
       })
-      .catch(() => dispatch({ tipo: 'carregar', dados: {} }));
+      .catch(() => dispatch({ tipo: 'carregar', dados: {} }))
+      .finally(() => baixarCatalogo());
   }, []);
 
   useEffect(() => {
