@@ -54,3 +54,13 @@ Registro das conversas de planejamento, para continuar o projeto em qualquer com
 - **Item "sensor":** o tipo padrão fica vazio no banco; o tipo vem do cômodo (`comodos.sensor_sugerido`).
 - **Carga do catálogo:** `npm run dados` agora também gera `supabase/seed/catalogo.sql` (insere ou atualiza; pode rodar quantas vezes quiser). Catálogo carregado: 37 produtos, 7 verificados.
 - **Avisos do Supabase aceitos de propósito:** `verificacoes` sem policy (só o administrador lê) e a função `produtos_mais_escolhidos()` com permissão de administrador (soma todos os orçamentos, mas só devolve números).
+
+## 26/11/2026 — Catálogo vindo do banco
+
+- **Por que:** preparar o plano Pro (no banco dá para liberar conteúdo só para assinantes; o que vai dentro do app qualquer um copia) e corrigir o catálogo sem publicar versão nova. O banco **não** deixa o catálogo mais seguro (ele é público de qualquer jeito) nem mais rápido; a segurança que importa é a de senhas e orçamentos, que já estão no banco com RLS.
+- **Onde se edita (opção A, escolhida pelo dono):** a planilha continua sendo a fonte. Caminho: planilha → `npm run dados` → aplicar `supabase/seed/catalogo.sql` no banco → `npm run comparar-catalogo` (tem que dar "igual"). Trocar a fonte para o banco fica para quando houver tela de administrador.
+- **No app:** abre na hora com a cópia guardada no aparelho (ou com o `catalogo.json` que vem dentro dele, o que for mais novo). Em segundo plano baixa do banco; a cópia nova só vale **na próxima abertura**, para a lista não mudar no meio do orçamento. Download incompleto é descartado.
+- **Banco:** `imoveis` e `tipos_aparelho` ganharam `ordem`; `produtos.teclas` virou texto (aceita "Verificar" e "—"); tabela nova `catalogo_info` com a data do catálogo.
+- **Chave do Supabase:** a chave **pública** (publishable) fica no arquivo `.env`, que vai para o GitHub; assim Vercel e GitHub Pages recebem sem configurar nada. A chave secreta nunca entra no projeto.
+- **Backup (correção):** a planilha tem backup no GitHub a cada commit. O plano grátis do Supabase **não** tem backup automático restaurável: assinar o plano Pro do Supabase quando o app tiver assinantes.
+- **Testes:** `npm run testes` (conversão banco → catálogo) e `npm run comparar-catalogo` (banco = planilha).

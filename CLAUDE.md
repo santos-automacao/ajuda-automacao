@@ -22,8 +22,8 @@ A ideia veio do app "Meu Ajudante" (orçamento de elétrica), mas aqui o foco é
 
 1. Conversar e decidir antes de programar. Registrar cada decisão em `docs/decisoes.md` (com data).
 2. O escopo vivo fica em `docs/escopo-mvp.md`.
-3. A planilha `catalogo/catalogo-casa.xlsx` é a fonte dos dados. `npm run dados` gera `src/dados/` (não editar `src/dados/` à mão).
-4. Antes de dizer que terminou: `npm run tipos`, `npm run lint`, `npm run exportar-web` e testar o fluxo no navegador em tamanho de celular (390 px) e de notebook (1366 px).
+3. A planilha `catalogo/catalogo-casa.xlsx` é a fonte dos dados. `npm run dados` gera `src/dados/` (não editar `src/dados/` à mão) e `supabase/seed/catalogo.sql`. Depois: aplicar o `catalogo.sql` no Supabase e rodar `npm run comparar-catalogo` (tem que dar "igual"). O app lê o catálogo do banco.
+4. Antes de dizer que terminou: `npm run testes`, `npm run tipos`, `npm run lint`, `npm run exportar-web` e testar o fluxo no navegador em tamanho de celular (390 px) e de notebook (1366 px).
 5. Commits em português. `git push` na `main` publica o site na **Vercel** (endereço principal para os testadores) e no GitHub Pages (reserva).
 
 ## Regras de tela (não quebrar)
@@ -35,19 +35,18 @@ A ideia veio do app "Meu Ajudante" (orçamento de elétrica), mas aqui o foco é
 - Palavras de eletricista, não de informática ("teclas do interruptor", "fio neutro", "127 V (110)").
 - Funciona sem internet; salva sozinho a cada toque.
 
-## Onde paramos (24/11/2026)
+## Onde paramos (26/11/2026)
 
-- Trabalho na branch **`skill/atualizar-catalogo`** (pull request #1, ainda **não** juntado na `main`).
-- No computador de casa: `npm run dados`, `npm run tipos` e `npm run lint` passaram; o catálogo gerado bateu com o do Claude (só mudou a data de geração).
-- **Falta antes do merge:** `npm run exportar-web` e testar a lista recomendada no navegador (390 px e 1366 px).
-- Para continuar em outro computador: `git fetch origin` → `git checkout skill/atualizar-catalogo` → `git pull` → `npm install`.
-- Depois do merge: ligar o app ao Supabase (1. catálogo vindo do banco, 2. login, 3. orçamentos na nuvem).
+- PR #1 (`skill/atualizar-catalogo`) **juntado na `main`** em 25/11; a Vercel publicou sozinha (ela publica a cada push na `main`).
+- Trabalho na branch **`catalogo-do-banco`**: o app lê o catálogo do Supabase e guarda cópia no aparelho (projeto em `docs/superpowers/specs/2026-11-26-catalogo-do-banco-design.md`, plano em `docs/superpowers/plans/`). Banco já atualizado (migração `20261126000000_catalogo_do_banco.sql` aplicada).
+- Para continuar em outro computador: `git fetch origin` → `git checkout catalogo-do-banco` → `git pull` → `npm install`.
+- Próximo: 2. login, 3. orçamentos na nuvem (daí sai o "mais escolhidos").
 
 ## Estado atual (18/11/2026)
 
 - **Protótipo navegável pronto**, sem banco e sem login.
-  - Vercel (principal, para mandar aos eletricistas): endereço `*.vercel.app` — anotar aqui depois de importar o projeto na Vercel.
-  - GitHub Pages (reserva): https://grs2001.github.io/ajuda-automacao/ (muda se o usuário do GitHub for renomeado).
+  - Vercel (principal, para mandar aos eletricistas): projeto `ajuda-automacao`, publica sozinho a cada push na `main`. Endereço `*.vercel.app`: anotar aqui.
+  - GitHub Pages (reserva): https://santos-automacao.github.io/ajuda-automacao/ (o repositório agora é da organização `santos-automacao`).
 - Fluxo: Início → Imóvel (só Casa) → Cômodos → Itens por cômodo → Perguntas da instalação → Lista recomendada → Valores → Proposta (PDF + WhatsApp) → Guia de instalação.
 - Regras elétricas R01–R17 implementadas em `src/logica/recomendar.ts` (o dono aprovou as regras em 18/11/2026).
 - **Sugestões de itens por cômodo: adiadas** (`USAR_SUGESTOES = false` em `src/estado/projeto.tsx`). Os itens começam em zero.
@@ -59,7 +58,7 @@ A ideia veio do app "Meu Ajudante" (orçamento de elétrica), mas aqui o foco é
 1. Testar o protótipo com 3 a 5 eletricistas (de preferência os mais velhos) e anotar onde travam.
 2. Verificar os produtos da planilha (número Anatel + manual) e cadastrar o que falta: tomada inteligente de embutir, motor de cortina, sensores de gás/vazamento/abertura/fumaça, central Zigbee.
 3. Ajustar as telas conforme o teste.
-4. Supabase: banco criado e catálogo carregado (23/11/2026). Falta: app ler o catálogo do banco, tela de login e salvar orçamentos na nuvem.
+4. Supabase: banco criado e catálogo carregado (23/11/2026). App lendo o catálogo do banco (26/11/2026). Falta: tela de login e salvar orçamentos na nuvem.
 5. Mostrar no app a "opção nacional" de cada tipo de aparelho e os "mais escolhidos pelos eletricistas".
 6. Depois: link para o cliente aprovar, 3 pacotes, Apartamento e Comércio.
 
